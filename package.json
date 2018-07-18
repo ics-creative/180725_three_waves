@@ -1,0 +1,23 @@
+{
+  "scripts": {
+    "build": "webpack --mode production",
+    "start": "webpack-serve",
+    "format": "prettier --write 'src/**/*.ts'"
+  },
+  "repository": "https://ics-ikeda@github.com/ics-creative/180725_three_waves.git",
+  "author": "ics-ikeda <ikeda@ics-web.jp>",
+  "license": "MIT",
+  "dependencies": {
+    "@types/three": "^0.92.12",
+    "simplenoise": "^1.0.1",
+    "three": "^0.94.0"
+  },
+  "devDependencies": {
+    "prettier": "^1.13.7",
+    "ts-loader": "^4.4.2",
+    "typescript": "^2.9.2",
+    "webpack": "^4.16.1",
+    "webpack-cli": "^3.0.8",
+    "webpack-serve": "^2.0.2"
+  }
+}
