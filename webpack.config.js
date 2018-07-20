@@ -28,8 +28,10 @@ module.exports = {
       ".ts", ".js", ".json"
     ],
   },
+  devtool: "source-map",
   serve: {
     open: true,
     content: 'dist/',
+    port: 5000
   },
 };

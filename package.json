@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "build": "webpack --mode production",
     "start": "webpack-serve",
+    "build": "webpack --mode production",
     "format": "prettier --write 'src/**/*.ts'"
   },
   "repository": "https://ics-ikeda@github.com/ics-creative/180725_three_waves.git",
