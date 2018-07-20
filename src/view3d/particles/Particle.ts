@@ -1,10 +1,12 @@
 import {
+  AdditiveBlending,
   BoxBufferGeometry,
   Color,
   Mesh,
   MeshBasicMaterial,
   Object3D,
-  PlaneBufferGeometry
+  PlaneBufferGeometry,
+  TextureLoader
 } from "three";
 
 /**
@@ -45,9 +47,19 @@ export class Particle extends Object3D {
       2;
     this.size = size;
 
-    const geometry = new PlaneBufferGeometry(50, 50);
+    const geometry = new PlaneBufferGeometry(200, 200);
+    const list = ["fire_particle.png", "circle.png", "circle_border.png"];
+
     const material = new MeshBasicMaterial({
-      color: 0xffffff,
+      color: new Color().setHSL(
+        0.5 + Math.random() * 0.3,
+        0.1,
+        0.5 + Math.random() * 0.5
+      ),
+      map: new TextureLoader().load(
+        list[Math.floor(list.length * Math.random())]
+      ),
+      blending: AdditiveBlending,
       transparent: true
     });
     const mesh = new Mesh(geometry, material);
@@ -143,7 +155,6 @@ export class Particle extends Object3D {
 
     this.x += this.vx;
     this.y += this.vy;
-
 
     this.position.set(this.x, this.y, this.z);
 

@@ -40,7 +40,7 @@ export class ParticleEmitter extends Emitter {
    * @param {number} x パーティクルの発生座標
    * @param {number} y パーティクルの発生座標
    */
-  public emit(x: number, y: number, z:number) {
+  public emit(x: number, y: number, z: number) {
     for (let i = 0; i < this.numParticles; i++) {
       this.getNewParticle(x, y, z);
     }

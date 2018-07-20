@@ -49,9 +49,9 @@ export class ParticleContainer extends Group {
       //     (window.innerHeight * 6) / 10
       // );
       this._emitter.emit(
-        1500 * (0.5 - Math.random()),
+        5000 * (Math.random() - 0.5),
         (window.innerHeight / 5) * (Math.random() - 0.5) + -1.0,
-        1000 * (Math.random() - 0.5)
+        10000 * (Math.random() - 0.5)
       );
     }
 
