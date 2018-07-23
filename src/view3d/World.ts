@@ -46,7 +46,7 @@ export class World {
     // カメラを作成
     // FOV:90 = 35mmLens: 18mm
     const camera = new PerspectiveCamera(30, 1.0, 1, 100000);
-    camera.position.set(0, 25, 1000);
+    camera.position.set(0, 100, 1000);
     camera.lookAt(new Vector3(0, 0, 0));
 
     this.camera = camera;
