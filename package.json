@@ -9,6 +9,7 @@
   "license": "MIT",
   "dependencies": {
     "@types/three": "^0.92.12",
+    "dat.gui": "^0.7.2",
     "simplenoise": "^1.0.1",
     "three": "^0.94.0"
   },

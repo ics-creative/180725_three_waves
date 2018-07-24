@@ -2,7 +2,7 @@ import {
   AdditiveBlending,
   Color,
   DirectionalLight,
-  Fog,
+  Fog, Group,
   Mesh,
   MeshBasicMaterial,
   MeshPhongMaterial,
@@ -13,11 +13,12 @@ import {
   Vector3,
   WebGLRenderer
 } from "three";
-
+import * as dat from 'dat.gui';
 import * as noise from "simplenoise";
-import { ParticleContainer } from "./particles/ParticleContainer";
-import { ParticleCloud } from "./ParticleCloud";
-import { WaveLine } from "./lines/WaveLine";
+import {ParticleContainer} from "./particles/ParticleContainer";
+import {ParticleCloud} from "./ParticleCloud";
+import {WaveLine} from "./lines/WaveLine";
+import {DebugInfo} from "./data/DebugInfo";
 
 const SEGMENT = 200;
 const LENGTH = 4000;
@@ -29,8 +30,10 @@ export class World {
   private _meshEarth: Mesh;
   private _meshBg: Mesh;
   private lines: WaveLine[];
-  private particleContainer: ParticleContainer;
-  private cloud: ParticleCloud;
+  private _particleContainer: ParticleContainer;
+  private _particleCloud: ParticleCloud;
+  private _visibleInfo: DebugInfo;
+  private _lineContainer: Group;
 
   constructor() {
     // レンダラーを作成
@@ -40,6 +43,19 @@ export class World {
     this.renderer = renderer;
     // canvasをbodyに追加
     document.body.appendChild(renderer.domElement);
+
+    // カスタマイズパラメーターの定義
+    var visibleInfo = new DebugInfo()
+    this._visibleInfo = visibleInfo;
+
+    // GUIパラメータの準備
+    const gui = new dat.GUI();
+    gui.add(visibleInfo, "bg")
+    gui.add(visibleInfo, "earth")
+    gui.add(visibleInfo, "particles")
+    gui.add(visibleInfo, "clouds")
+    gui.add(visibleInfo, "waves")
+
 
     // シーンを作成
     const scene = new Scene();
@@ -82,6 +98,9 @@ export class World {
 
     noise.seed(0);
 
+    const lineContainer= new Group();
+    scene.add(lineContainer);
+    this._lineContainer = lineContainer;
     const lines = [];
     const maxLines = 15;
     new Array(maxLines).fill(0).forEach((el, j) => {
@@ -91,7 +110,7 @@ export class World {
           maxLines,
           Math.max(1, Math.round(j ** 3 / 60))
         );
-        scene.add(line);
+        lineContainer.add(line);
         lines.push(line);
       }
     });
@@ -99,7 +118,7 @@ export class World {
 
     const p = new ParticleContainer(2);
     this.scene.add(p);
-    this.particleContainer = p;
+    this._particleContainer = p;
 
     {
       // 背景を作成
@@ -123,7 +142,7 @@ export class World {
       // パーティクルを作成
       const cloud = new ParticleCloud(10000, -200, +500, 200);
       scene.add(cloud);
-      this.cloud = cloud;
+      this._particleCloud = cloud;
     }
 
     window.addEventListener("resize", event => {
@@ -159,7 +178,7 @@ export class World {
       line.update(delta, noise, j);
     });
 
-    this.cloud.update();
+    this._particleCloud.update();
 
     // カメラを動かす
     this.camera.position.x = Math.cos(Date.now() / 3000) * 50;
@@ -167,6 +186,13 @@ export class World {
     this.camera.lookAt(new Vector3(0, 0, 0));
 
     this._meshBg.lookAt(this.camera.position);
+
+    // 表示有無を更新
+    this._meshBg.visible = this._visibleInfo.bg;
+    this._particleContainer.visible = this._visibleInfo.particles;
+    this._particleCloud.visible = this._visibleInfo.clouds;
+    this._meshEarth.visible = this._visibleInfo.earth;
+    this._lineContainer.visible = this._visibleInfo.waves;
 
     // 描画
     this.renderer.render(this.scene, this.camera);
