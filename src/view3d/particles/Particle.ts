@@ -6,8 +6,11 @@ import {
   MeshBasicMaterial,
   Object3D,
   PlaneBufferGeometry,
+  Sprite,
+  SpriteMaterial,
   TextureLoader
 } from "three";
+import { TextureManager } from "../TextureManager";
 
 /**
  * 粒子クラスです。
@@ -20,6 +23,7 @@ export class Particle extends Object3D {
   public scaleValue: number;
   public vx: number;
   public vy: number;
+  public vz: number;
   public life: number;
   public size: number;
   public vSize: number;
@@ -29,7 +33,7 @@ export class Particle extends Object3D {
   private _destroy: boolean;
   private MAX_SIZE: number = 128;
 
-  private _mesh: Mesh;
+  private _mesh: Sprite;
 
   /**
    * コンストラクタ
@@ -47,90 +51,50 @@ export class Particle extends Object3D {
       2;
     this.size = size;
 
-    const geometry = new PlaneBufferGeometry(200, 200);
-    const list = ["fire_particle.png", "circle.png", "circle_border.png"];
+    const list = [
+      TextureManager.circle,
+      TextureManager.circle_border,
+      TextureManager.fire_particle
+    ];
 
-    const material = new MeshBasicMaterial({
+    const material = new SpriteMaterial({
       color: new Color().setHSL(
         0.5 + Math.random() * 0.3,
         0.1,
         0.5 + Math.random() * 0.5
       ),
-      map: new TextureLoader().load(
-        list[Math.floor(list.length * Math.random())]
-      ),
+      map: list[Math.floor(list.length * Math.random())],
       blending: AdditiveBlending,
+      depthTest: true,
+      depthWrite: true,
       transparent: true
     });
-    const mesh = new Mesh(geometry, material);
+    material.fog = true;
+    const mesh = new Sprite(material);
+
     this.add(mesh);
     this._mesh = mesh;
-
-    const colorHsl = new Color().setHSL(0, 0, (20 + Math.random() * 50) / 100);
-
-    // this.graphics.clear();
-    // if (Math.random() < 0.4) {
-    //   // もやっとした円
-    //   this.graphics.beginRadialGradientFill(
-    //     [colorHsl, "#000000"],
-    //     [0.0, 1.0],
-    //     0,
-    //     0,
-    //     0,
-    //     0,
-    //     0,
-    //     this.size
-    //   );
-    // } else if (Math.random() < 0.1) {
-    //   // 輪郭だけの円
-    //   this.graphics
-    //     .setStrokeStyle(1) // 線の太さ
-    //     .beginStroke(Graphics.getRGB(255, 255, 255));
-    // } else if (Math.random() < 0.3) {
-    //   // 輪郭だけの円
-    //   this.graphics
-    //     .setStrokeStyle(1.5) // 線の太さ
-    //     .beginStroke(Graphics.getRGB(255, 255, 255));
-    // } else {
-    //   // キリッとした円
-    //   this.graphics.beginFill(colorHsl);
-    // }
-    //
-    // this.graphics.drawCircle(0, 0, this.size);
-    // this.graphics.endFill();
-
-    // 大量のオブジェクトを重ねるとおかしくなる
-    // this.compositeOperation = "lighter";
-    //
-    // this.mouseEnabled = false;
-    // const padding = 2;
-    // this.cache(
-    //   -this.size - padding,
-    //   -this.size - padding,
-    //   this.size * 2 + padding * 2,
-    //   this.size * 2 + padding * 2
-    // );
 
     this._destroy = true;
   }
 
   /**
    * パーティクルをリセットします。
-   * @param emitX
-   * @param emitY
    */
   public resetParameters(
     emitX: number,
     emitY: number,
     emitZ: number,
     startVx: number,
-    startVy: number
+    startVy: number,
+    startVz: number
   ): void {
     this.x = emitX;
     this.y = emitY;
     this.z = emitZ;
     this.vx = (Math.random() - 0.5) * startVx;
     this.vy = (Math.random() - 0.5) * startVy;
+    this.vz = (Math.random() - 0.5) * startVz;
     this.life = Math.random() * Math.random() * 400 + 40;
     this.vSize = Math.random() * 0.5;
     this.baseAlpha = 0.7;
@@ -152,9 +116,11 @@ export class Particle extends Object3D {
     // 摩擦計算
     this.vx *= 0.98;
     this.vy *= 0.98;
+    this.vz *= 0.98;
 
     this.x += this.vx;
     this.y += this.vy;
+    this.z += this.vz;
 
     this.position.set(this.x, this.y, this.z);
 
@@ -164,10 +130,10 @@ export class Particle extends Object3D {
     const sizeNew: number = 1 - (this._count / this.life) * this.vSize;
 
     this.alpha = Math.random() * 0.3 + this.baseAlpha * maxD;
-    this.scaleValue = sizeNew;
+    this.scaleValue = sizeNew * 200;
 
-    this._mesh.scale.setLength(sizeNew);
-    (this._mesh.material as MeshBasicMaterial).opacity = this.alpha;
+    this._mesh.scale.setLength(this.scaleValue);
+    (this._mesh.material as SpriteMaterial).opacity = this.alpha;
 
     // 死亡フラグ
     if (this.life < this._count) {

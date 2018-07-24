@@ -2,11 +2,11 @@ import {
   AdditiveBlending,
   Color,
   DirectionalLight,
+  Fog,
   Mesh,
   MeshBasicMaterial,
   MeshPhongMaterial,
   PerspectiveCamera,
-  PlaneBufferGeometry,
   PlaneGeometry,
   Scene,
   TextureLoader,
@@ -16,24 +16,27 @@ import {
 
 import * as noise from "simplenoise";
 import { ParticleContainer } from "./particles/ParticleContainer";
-import { ParticleCloud } from "./particle-cloud";
+import { ParticleCloud } from "./ParticleCloud";
 import { WaveLine } from "./lines/WaveLine";
 
-const SEGMENT = 100;
-const LENGTH = 5000;
+const SEGMENT = 200;
+const LENGTH = 4000;
 
 export class World {
-  private scene: Scene;
-  private camera: PerspectiveCamera;
+  private readonly scene: Scene;
+  private readonly camera: PerspectiveCamera;
   private renderer: WebGLRenderer;
-  private earth: Mesh;
+  private _meshEarth: Mesh;
+  private _meshBg: Mesh;
   private lines: WaveLine[];
   private particleContainer: ParticleContainer;
   private cloud: ParticleCloud;
 
   constructor() {
     // レンダラーを作成
-    const renderer = new WebGLRenderer();
+    const renderer = new WebGLRenderer({
+      antialias: devicePixelRatio === 1.0
+    });
     this.renderer = renderer;
     // canvasをbodyに追加
     document.body.appendChild(renderer.domElement);
@@ -41,12 +44,12 @@ export class World {
     // シーンを作成
     const scene = new Scene();
     this.scene = scene;
-    // scene.fog = new Fog(0x000000, 50, 2000);
+    scene.fog = new Fog(0x000000, 50, 4000);
 
     // カメラを作成
     // FOV:90 = 35mmLens: 18mm
     const camera = new PerspectiveCamera(30, 1.0, 1, 100000);
-    camera.position.set(0, 100, 1000);
+    camera.position.set(0, 50, 1000);
     camera.lookAt(new Vector3(0, 0, 0));
 
     this.camera = camera;
@@ -60,17 +63,16 @@ export class World {
         SEGMENT
       );
       const material = new MeshPhongMaterial({
-        color: new Color().setHSL(0.75, 0.8, 0.2),
-        // flatShading: true,
+        color: new Color().setHSL(0.75, 0.75, 0.5),
         blending: AdditiveBlending,
         wireframe: true
       });
-      const box = new Mesh(geometry, material);
-      box.position.y = -200;
-      box.rotateX(-Math.PI / 2);
-      box.rotateZ(Math.PI / 3);
-      scene.add(box);
-      this.earth = box;
+      const mesh = new Mesh(geometry, material);
+      mesh.position.y = -200;
+      mesh.rotateX(-Math.PI / 2);
+      mesh.rotateZ(Math.PI / 3);
+      scene.add(mesh);
+      this._meshEarth = mesh;
     }
 
     // 平行光源を生成
@@ -87,7 +89,7 @@ export class World {
         const line = new WaveLine(
           j,
           maxLines,
-          Math.max(1, Math.round(j ** 3 / 80))
+          Math.max(1, Math.round(j ** 3 / 60))
         );
         scene.add(line);
         lines.push(line);
@@ -95,26 +97,31 @@ export class World {
     });
     this.lines = lines;
 
-    const p = new ParticleContainer(1);
+    const p = new ParticleContainer(2);
     this.scene.add(p);
     this.particleContainer = p;
 
     {
       // 背景を作成
-      const geometory = new PlaneBufferGeometry(20000, 20000);
+      const geometry = new PlaneGeometry(700, 700);
       const material = new MeshBasicMaterial({
-        map: new TextureLoader().load("bg.png")
+        map: new TextureLoader().load("bg.png"),
+        blending: AdditiveBlending,
+        transparent: true,
+        depthTest: false,
+        depthWrite: false
       });
 
-      const mesh = new Mesh(geometory, material);
-      mesh.position.setZ(-20000);
+      const mesh = new Mesh(geometry, material);
+      // mesh.position.setZ(+750);
 
       scene.add(mesh);
+      this._meshBg = mesh;
     }
 
     {
       // パーティクルを作成
-      const cloud = new ParticleCloud(10, -500, +1000);
+      const cloud = new ParticleCloud(10000, -200, +500, 200);
       scene.add(cloud);
       this.cloud = cloud;
     }
@@ -127,20 +134,21 @@ export class World {
     this.tick(0);
   }
 
-  tick(delta) {
+  private tick(delta): void {
     requestAnimationFrame(delta => {
       this.tick(delta);
     });
 
+    // 地面のうねうね
     {
-      const geometry = this.earth.geometry as PlaneGeometry;
+      const geometry = this._meshEarth.geometry as PlaneGeometry;
       const vertices = geometry.vertices;
 
       vertices.forEach((vertex, index) => {
         const col = index % (SEGMENT + 1);
         const row = Math.floor(index / (SEGMENT + 1));
 
-        const z = noise.perlin3(col / 50, row / 50, delta / 10000) * 200;
+        const z = noise.perlin3(col / 20, row / 20, delta / 5000) * 200;
 
         vertex.setZ(z);
       });
@@ -152,13 +160,19 @@ export class World {
     });
 
     this.cloud.update();
-    // this.particleContainer.update();
+
+    // カメラを動かす
+    this.camera.position.x = Math.cos(Date.now() / 3000) * 50;
+    this.camera.position.y = Math.sin(Date.now() / 2000) * 50 + 25;
+    this.camera.lookAt(new Vector3(0, 0, 0));
+
+    this._meshBg.lookAt(this.camera.position);
 
     // 描画
     this.renderer.render(this.scene, this.camera);
   }
 
-  resize() {
+  private resize(): void {
     // サイズを取得
     const width = window.innerWidth;
     const height = window.innerHeight;
@@ -170,5 +184,10 @@ export class World {
     // カメラのアスペクト比を正す
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
+
+    // 背景の縦横比を調整
+    const sx = width / height;
+    const sy = 1.0;
+    this._meshBg.scale.set(sx, sy, 1.0);
   }
 }

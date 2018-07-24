@@ -7,6 +7,7 @@ import {
   TextureLoader,
   Vector3
 } from "three";
+import { TextureManager } from "./TextureManager";
 
 /**
  * パーティクルのクラウドです。
@@ -17,39 +18,41 @@ export class ParticleCloud extends Object3D {
 
   /**
    * コンストラクターです。
-   * @param {number} coefficient 係数です。
-   * @param {number} zStart
-   * @param {number} zEnd
+   * @param {number} particleNum パーティクルの個数。
+   * @param {number} yStart
+   * @param {number} yEnd
+   * @param yVariance
    */
   constructor(
-    coefficient: number,
-    private zStart: number,
-    private zEnd: number
+    particleNum: number,
+    private yStart: number,
+    private yEnd: number,
+    private yVariance: number
   ) {
     super();
 
     // 形状データを作成
     const geometry = new Geometry();
-    const numParticles = coefficient * 100;
-    const SIZE = 5000;
+    const numParticles = particleNum;
+    const SIZE = 3000;
     for (let i = 0; i < numParticles; i++) {
       geometry.vertices.push(
         new Vector3(
           SIZE * (Math.random() - 0.5),
-          (zEnd - zStart) * Math.random() + zStart,
+          yVariance * Math.random() + yStart,
           SIZE * (Math.random() - 0.5)
         )
       );
 
-      this._speedList[i] = 2 * Math.random() * Math.random();
+      this._speedList[i] = 1 * Math.random() * Math.random();
     }
     // マテリアルを作成
-    const texture = new TextureLoader().load("circle.png");
+    const texture = TextureManager.circle;
     const material = new PointsMaterial({
-      size: 5,
+      size: 3,
       blending: AdditiveBlending,
       transparent: true,
-      alphaTest: 0.1, // 矩形領域に黒枠表示されるのを防ぐため
+      // alphaTest: 0.1, // 矩形領域に黒枠表示されるのを防ぐため
       depthTest: true,
       map: texture
     });
@@ -67,8 +70,8 @@ export class ParticleCloud extends Object3D {
     this._geometry.vertices.map((vertex: Vector3, index: number) => {
       vertex.y += this._speedList[index];
 
-      if (vertex.y > this.zEnd) {
-        vertex.y = this.zStart;
+      if (vertex.y > this.yEnd) {
+        vertex.y = this.yStart;
       }
     });
 

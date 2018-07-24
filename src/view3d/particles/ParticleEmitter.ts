@@ -20,7 +20,8 @@ export class ParticleEmitter extends Emitter {
   constructor(
     private numParticles: number,
     private startVx: number,
-    private startVy: number
+    private startVy: number,
+    private startVz: number
   ) {
     super();
 
@@ -37,8 +38,9 @@ export class ParticleEmitter extends Emitter {
 
   /**
    * パーティクルを発生させます。
-   * @param {number} x パーティクルの発生座標
-   * @param {number} y パーティクルの発生座標
+   * @param x パーティクルの発生X座標
+   * @param y パーティクルの発生Y座標
+   * @param z パーティクルの発生Z座標
    */
   public emit(x: number, y: number, z: number) {
     for (let i = 0; i < this.numParticles; i++) {
@@ -63,11 +65,20 @@ export class ParticleEmitter extends Emitter {
 
   /**
    * パーティクルを追加します。
-   * @param {THREE.Vector3} emitPoint
+   * @param emitX
+   * @param emitY
+   * @param emitZ
    */
   private getNewParticle(emitX: number, emitY: number, emitZ: number) {
     const particle = this.fromPool();
-    particle.resetParameters(emitX, emitY, emitZ, this.startVx, this.startVy);
+    particle.resetParameters(
+      emitX,
+      emitY,
+      emitZ,
+      this.startVx,
+      this.startVy,
+      this.startVz
+    );
     this._particleActive.push(particle);
     this.container.add(particle);
     return particle;
@@ -90,7 +101,7 @@ export class ParticleEmitter extends Emitter {
 
   /**
    * アクティブなパーティクルを取り出します。
-   * @returns {project.Particle[]}
+   * @returns {Particle[]}
    */
   public getActiveParticles(): Particle[] {
     return this._particleActive;
@@ -109,7 +120,7 @@ export class ParticleEmitter extends Emitter {
 
   /**
    * プールにインスタンスを格納します。
-   * @param {Particle}
+   * @param particle
    */
   private toPool(particle: Particle): void {
     this._particlePool.push(particle);
