@@ -57,6 +57,13 @@ export class World {
       gui.add(visibleInfo, "particles");
       gui.add(visibleInfo, "clouds");
       gui.add(visibleInfo, "waves");
+      gui.add(visibleInfo, "title").onChange(flag => {
+        // 強引に参照
+        const title = document.querySelector("#mainTitle") as HTMLElement;
+        // 表示を切り替える
+        title.className = flag ? "show" : "";
+      });
+      gui.closed = true; // 閉じておく
       this._debugInfo = visibleInfo;
     }
 
