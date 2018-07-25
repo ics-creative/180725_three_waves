@@ -7,6 +7,8 @@
     "module": "es2015",
     // node_modules からライブラリを読み込む
     "moduleResolution": "node",
+    // Provide full support for iterables in 'for-of', spread, and destructuring when targeting 'ES5' or 'ES3'
+    "downlevelIteration": true,
     "lib": [
       "es2018",
       "dom"
