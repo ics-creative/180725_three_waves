@@ -14,7 +14,6 @@ export class WaveLine extends Object3D {
 
     this.lines = [];
 
-    console.log(step);
     new Array(step).fill(0).forEach((value, k) => {
       const material = new LineBasicMaterial({
         color: new Color().setHSL(

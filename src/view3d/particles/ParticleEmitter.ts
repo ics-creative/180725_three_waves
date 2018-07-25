@@ -12,10 +12,10 @@ export class ParticleEmitter extends Emitter {
   private _particlePool: Particle[];
 
   /**
-   * @constructor
    * @param numParticles 1フレーム間に発生させる Particle 数
    * @param startVx
    * @param startVy
+   * @param startVz
    */
   constructor(
     private numParticles: number,

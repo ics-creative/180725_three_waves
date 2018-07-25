@@ -5,3 +5,4 @@ node_modules
 Thumbs.db
 yarn.lock
 package-lock.json
+/docs/main.js.map

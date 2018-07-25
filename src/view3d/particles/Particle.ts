@@ -12,6 +12,8 @@ import {
 } from "three";
 import { TextureManager } from "../TextureManager";
 
+const MAX_PARTICLE_SIZE = 100;
+
 /**
  * 粒子クラスです。
  */
@@ -25,13 +27,11 @@ export class Particle extends Object3D {
   public vy: number;
   public vz: number;
   public life: number;
-  public size: number;
   public vSize: number;
   public baseAlpha: number;
 
   private _count: number;
   private _destroy: boolean;
-  private MAX_SIZE: number = 128;
 
   private _mesh: Sprite;
 
@@ -41,15 +41,6 @@ export class Particle extends Object3D {
    */
   constructor() {
     super();
-
-    const size =
-      Math.random() *
-        Math.random() *
-        Math.random() *
-        Math.random() *
-        this.MAX_SIZE +
-      2;
-    this.size = size;
 
     const list = [
       TextureManager.circle,
@@ -96,8 +87,8 @@ export class Particle extends Object3D {
     this.vy = (Math.random() - 0.5) * startVy;
     this.vz = (Math.random() - 0.5) * startVz;
     this.life = Math.random() * Math.random() * 400 + 40;
-    this.vSize = Math.random() * 0.5;
-    this.baseAlpha = 0.7;
+    this.vSize = Math.random() * 0.2;
+    this.baseAlpha = 1.0;
     this._destroy = false;
     this._count = 0;
 
@@ -129,8 +120,9 @@ export class Particle extends Object3D {
     const maxD: number = 1 - this._count / this.life;
     const sizeNew: number = 1 - (this._count / this.life) * this.vSize;
 
-    this.alpha = Math.random() * 0.3 + this.baseAlpha * maxD;
-    this.scaleValue = sizeNew * 200;
+    this.alpha = Math.random() * 0.2 + this.baseAlpha * maxD;
+
+    this.scaleValue = sizeNew * MAX_PARTICLE_SIZE;
 
     this._mesh.scale.setLength(this.scaleValue);
     (this._mesh.material as SpriteMaterial).opacity = this.alpha;

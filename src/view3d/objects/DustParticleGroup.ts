@@ -1,18 +1,17 @@
 import {
   AdditiveBlending,
   Geometry,
-  Object3D,
+  Group,
   Points,
   PointsMaterial,
-  TextureLoader,
   Vector3
 } from "three";
-import { TextureManager } from "./TextureManager";
+import { TextureManager } from "../TextureManager";
 
 /**
- * パーティクルのクラウドです。
+ * 塵のようなパーティクルです。
  */
-export class ParticleCloud extends Object3D {
+export class DustParticleGroup extends Group {
   private _geometry: Geometry;
   private _speedList: number[] = [];
 
@@ -44,7 +43,7 @@ export class ParticleCloud extends Object3D {
         )
       );
 
-      this._speedList[i] = 1 * Math.random() * Math.random();
+      this._speedList[i] = Math.random() * Math.random();
     }
     // マテリアルを作成
     const texture = TextureManager.circle;
@@ -52,8 +51,8 @@ export class ParticleCloud extends Object3D {
       size: 3,
       blending: AdditiveBlending,
       transparent: true,
-      // alphaTest: 0.1, // 矩形領域に黒枠表示されるのを防ぐため
       depthTest: true,
+      depthWrite: true,
       map: texture
     });
 
@@ -65,7 +64,7 @@ export class ParticleCloud extends Object3D {
     this._geometry = geometry;
   }
 
-  public update(): void {
+  public update(delta: number): void {
     // 星を動かす
     this._geometry.vertices.map((vertex: Vector3, index: number) => {
       vertex.y += this._speedList[index];

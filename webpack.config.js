@@ -1,16 +1,8 @@
 module.exports = {
-  // モード値を production に設定すると最適化された状態で、
-  // development に設定するとソースマップ有効でJSファイルが出力される
-  mode: "development",
-
-  // メインとなるJavaScriptファイル（エントリーポイント）
-  entry: "./src/index.ts",
-  // ファイルの出力設定
+  mode: 'development',
+  // 出力フォルダー
   output: {
-    //  出力ファイルのディレクトリ名
-    path: `${__dirname}/dist`,
-    // 出力ファイル名
-    filename: "main.js"
+    path: __dirname + '/docs',
   },
   module: {
     rules: [
@@ -19,7 +11,14 @@ module.exports = {
         test: /\.ts$/,
         // TypeScript をコンパイルする
         use: "ts-loader"
+      },
+      {
+        // 対象となるファイルの拡張子
+        test: /\.(jpg|png)$/,
+        // 画像をBase64として取り込む
+        loader: 'url-loader'
       }
+
     ]
   },
   // import 文で .ts ファイルを解決するため
@@ -28,10 +27,10 @@ module.exports = {
       ".ts", ".js", ".json"
     ],
   },
-  devtool: "source-map",
+  devtool: 'source-map',
   serve: {
     open: true,
-    content: 'dist/',
+    content: 'docs/',
     port: 5000
   },
 };

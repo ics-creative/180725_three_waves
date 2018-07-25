@@ -4,5 +4,4 @@ export class DebugInfo {
   particles: boolean = true;
   clouds: boolean = true;
   waves: boolean = true;
-
 }
