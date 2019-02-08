@@ -15,8 +15,9 @@ import { DebugInfo } from "./data/DebugInfo";
 import { Earth } from "./objects/Earth";
 import { WaveLines } from "./lines/WaveLines";
 import { BackGround } from "./objects/BackGround";
+import { Dummy } from "./objects/Dummy";
 
-const USE_DEBUG: boolean = true;
+const USE_DEBUG: boolean = false;
 
 /**
  * 空間の登場人物を管理するためのインターフェースです。
@@ -27,7 +28,7 @@ interface IThreeObjects {
   /** 背景 */
   bg: BackGround;
   /** 波模様 */
-  waveLines: WaveLines;
+  waveLines: Dummy;
   /** 画面中央に発生するでかい粒子 */
   bigParticleGroup: BigParticleGroup;
   /** 塵のように発生する微粒子 */
@@ -76,7 +77,7 @@ export class World {
     {
       // レンダラーを作成
       this.renderer = new WebGLRenderer({
-        antialias: devicePixelRatio === 1.0,
+        antialias: false,
         canvas: document.querySelector("canvas")
       });
 
@@ -123,14 +124,14 @@ export class World {
 
       {
         // 波線を作成
-        const group = new WaveLines();
+        const group = new Dummy();
         this.scene.add(group);
         objects.waveLines = group;
       }
 
       {
         // パーティクル群を作成
-        const group = new BigParticleGroup(2);
+        const group = new BigParticleGroup(1);
         this.scene.add(group);
         objects.bigParticleGroup = group;
       }
@@ -144,7 +145,7 @@ export class World {
 
       {
         // パーティクルを作成
-        const group = new DustParticleGroup(10000, -200, +500, 200);
+        const group = new DustParticleGroup(1000, -200, +500, 200);
         this.scene.add(group);
         objects.dustParticleGroup = group;
       }
@@ -158,10 +159,16 @@ export class World {
     this.tick(0);
   }
 
+  private _count = 0;
+
   private tick(delta: number): void {
     requestAnimationFrame(delta => {
       this.tick(delta);
     });
+
+    if (this._count++ % 3 !== 0) {
+      return;
+    }
 
     {
       // カメラを動かす
