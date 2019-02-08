@@ -14,8 +14,7 @@ export class WaveLine extends Object3D {
 
     this.lines = [];
 
-
-    [...Array(step).keys()].forEach((k) => {
+    [...Array(step).keys()].forEach(k => {
       const material = new LineBasicMaterial({
         color: new Color().setHSL(
           0.6 + (j / maxLines) * 0.2,
@@ -27,7 +26,7 @@ export class WaveLine extends Object3D {
 
       const max = 400;
 
-      [...Array(max).keys()].forEach((i) => {
+      [...Array(max).keys()].forEach(i => {
         geometry.vertices.push(
           new Vector3((max / 2 - i) * 5, 0, (j - maxLines / 2) * 150 + 250)
         );
