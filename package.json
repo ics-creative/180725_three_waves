@@ -8,18 +8,18 @@
   "author": "ics-ikeda <ikeda@ics-web.jp>",
   "license": "MIT",
   "dependencies": {
-    "@types/three": "^0.92.12",
-    "dat.gui": "^0.7.2",
+    "@types/three": "^0.93.19",
+    "dat.gui": "^0.7.5",
     "simplenoise": "^1.0.1",
-    "three": "^0.94.0"
+    "three": "^0.101.1"
   },
   "devDependencies": {
-    "prettier": "^1.13.7",
-    "ts-loader": "^4.4.2",
-    "typescript": "^2.9.2",
-    "url-loader": "^1.0.1",
-    "webpack": "^4.16.1",
-    "webpack-cli": "^3.0.8",
-    "webpack-serve": "^2.0.2"
+    "prettier": "^1.16.4",
+    "ts-loader": "^5.3.3",
+    "typescript": "^3.3.3",
+    "url-loader": "^1.1.2",
+    "webpack": "^4.29.3",
+    "webpack-cli": "^3.2.3",
+    "webpack-serve": "^2.0.3"
   }
 }
