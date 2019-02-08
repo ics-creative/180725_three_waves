@@ -16,6 +16,8 @@ import { Earth } from "./objects/Earth";
 import { WaveLines } from "./lines/WaveLines";
 import { BackGround } from "./objects/BackGround";
 
+const USE_DEBUG: boolean = true;
+
 /**
  * 空間の登場人物を管理するためのインターフェースです。
  */
@@ -42,14 +44,16 @@ export class World {
 
   private readonly _objects: IThreeObjects;
   private readonly _debugInfo: DebugInfo;
+  private _needResize: boolean = false;
 
   constructor() {
     // ------------------------------------
     // デバッグのための情報を定義
     // ------------------------------------
-    {
-      // カスタマイズパラメーターの定義
-      const visibleInfo = new DebugInfo();
+    // カスタマイズパラメーターの定義
+    const visibleInfo = new DebugInfo();
+    this._debugInfo = visibleInfo;
+    if (USE_DEBUG === true) {
       // GUIパラメータの準備
       const gui = new dat.GUI();
       gui.add(visibleInfo, "bg");
@@ -64,7 +68,6 @@ export class World {
         title.className = flag ? "show" : "";
       });
       gui.closed = true; // 閉じておく
-      this._debugInfo = visibleInfo;
     }
 
     // ------------------------------------
@@ -177,8 +180,8 @@ export class World {
       this._objects.bg.lookAt(this.camera.position); // 背景はカメラに向ける
     }
 
-    {
-      // 表示有無を更新
+    // 表示有無を更新
+    if (this._debugInfo) {
       this._objects.bg.visible = this._debugInfo.bg;
       this._objects.bigParticleGroup.visible = this._debugInfo.particles;
       this._objects.dustParticleGroup.visible = this._debugInfo.clouds;
@@ -186,17 +189,26 @@ export class World {
       this._objects.waveLines.visible = this._debugInfo.waves;
     }
 
+    if (this._needResize === true) {
+      this.resizeCore();
+      this._needResize = false;
+    }
+
     // 描画
     this.renderer.render(this.scene, this.camera);
   }
 
   private resize(): void {
+    this._needResize = true;
+  }
+  private resizeCore() {
     // サイズを取得
     const width = window.innerWidth;
     const height = window.innerHeight;
 
     // レンダラーのサイズを調整する
-    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setPixelRatio(1);
+    // this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(width, height);
 
     // カメラのアスペクト比を正す
