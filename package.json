@@ -6,7 +6,7 @@
   },
   "repository": "https://ics-ikeda@github.com/ics-creative/180725_three_waves.git",
   "author": "ics-ikeda <ikeda@ics-web.jp>",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "@types/three": "^0.93.19",
     "dat.gui": "^0.7.5",
