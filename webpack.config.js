@@ -34,7 +34,6 @@ module.exports = {
       ".ts", ".js", ".json"
     ],
   },
-  devtool: 'source-map',
   // ローカル開発用環境を立ち上げる
   // 実行時にブラウザが自動的に localhost を開く
   devServer: {
