@@ -6,8 +6,6 @@ let worker: any;
 const enabledOffscreenCanvas =
   "transferControlToOffscreen" in document.createElement("canvas");
 
-// const enabledOffscreenCanvas = false;
-
 const USE_DEBUG: boolean = false;
 
 // ------------------------------------
@@ -32,13 +30,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   const params = {
     visibleInfo
   };
-  const size = {
-    type: "resize",
-    width: innerWidth,
-    height: innerHeight,
-    devicePixelRatio: devicePixelRatio
-  };
-  if (enabledOffscreenCanvas === true) {
+  if (enabledOffscreenCanvas) {
     // Workerを作成し、OffscreenCanvasを渡す
     worker = new Worker("./worker.js");
 
@@ -53,7 +45,7 @@ window.addEventListener("DOMContentLoaded", async () => {
       [offscreenCanvas]
     );
 
-    worker.postMessage(size);
+    worker.postMessage(createSizeObject());
   } else {
     // @ts-ignore
     const { World } = await import("./view3d/World");
@@ -63,21 +55,23 @@ window.addEventListener("DOMContentLoaded", async () => {
       canvas: canvas,
       ...params
     });
-    world.resize(size);
+    world.resize(createSizeObject());
   }
 });
 
 window.addEventListener("resize", event => {
-  const size = {
+  if (enabledOffscreenCanvas) {
+    worker.postMessage(createSizeObject());
+  } else {
+    world.resize(createSizeObject());
+  }
+});
+
+function createSizeObject() {
+  return {
     type: "resize",
     width: innerWidth,
     height: innerHeight,
     devicePixelRatio: devicePixelRatio
   };
-
-  if (enabledOffscreenCanvas === true) {
-    worker.postMessage(size);
-  } else {
-    world.resize(size);
-  }
-});
+}

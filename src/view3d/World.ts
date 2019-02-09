@@ -119,7 +119,7 @@ export class World {
 
       {
         // パーティクル群を作成
-        const group = new BigParticleGroup(2);
+        const group = new BigParticleGroup(1);
         this.scene.add(group);
         objects.bigParticleGroup = group;
       }
@@ -142,10 +142,15 @@ export class World {
     this.tick(0);
   }
 
+  private _count = 0;
   private tick(delta: number): void {
     requestAnimationFrame(delta => {
       this.tick(delta);
     });
+
+    if (this._count++ % 2 === 0) {
+      return;
+    }
 
     {
       // カメラを動かす
@@ -156,10 +161,11 @@ export class World {
 
     {
       // 登場人物の更新
-      this._objects.earth.update(delta); // 地面のうねうね
-      this._objects.waveLines.update(delta); // 波のうねうね
-      this._objects.dustParticleGroup.update(delta); // 昇天する粒子
-      this._objects.bigParticleGroup.update(delta); // 昇天する粒子
+      if (this._debugInfo.bg) this._objects.earth.update(delta); // 地面のうねうね
+      if (this._debugInfo.waves) this._objects.waveLines.update(delta); // 波のうねうね
+      if (this._debugInfo.clouds) this._objects.dustParticleGroup.update(delta); // 昇天する粒子
+      if (this._debugInfo.particles)
+        this._objects.bigParticleGroup.update(delta); // 昇天する粒子
 
       this._objects.bg.lookAt(this.camera.position); // 背景はカメラに向ける
     }

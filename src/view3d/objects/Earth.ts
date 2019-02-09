@@ -7,7 +7,7 @@ import {
 } from "three";
 import * as noise from "simplenoise";
 
-const SEGMENT = 200;
+const SEGMENT = 75;
 const LENGTH = 4000;
 
 export class Earth extends Mesh {

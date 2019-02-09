@@ -24,11 +24,11 @@ export class WaveLine extends Object3D {
       });
       const geometry = new Geometry();
 
-      const max = 400;
+      const max = 200;
 
       [...Array(max).keys()].forEach(i => {
         geometry.vertices.push(
-          new Vector3((max / 2 - i) * 5, 0, (j - maxLines / 2) * 150 + 250)
+          new Vector3((max / 2 - i) * 10, 0, (j - maxLines / 2) * 100 + 500)
         );
       });
 
@@ -45,7 +45,7 @@ export class WaveLine extends Object3D {
 
       vertices.forEach((vertex, i) => {
         const y =
-          noise.perlin3(i / 100, (delta + k * 100) / 10000 + j * 300, 0) * 100;
+          noise.perlin3(i / 100, (delta + k * 300) / 10000 + j * 300, 0) * 200;
 
         vertex.setY(y);
       });

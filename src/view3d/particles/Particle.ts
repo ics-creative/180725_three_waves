@@ -1,14 +1,9 @@
 import {
   AdditiveBlending,
-  BoxBufferGeometry,
   Color,
-  Mesh,
-  MeshBasicMaterial,
   Object3D,
-  PlaneBufferGeometry,
   Sprite,
-  SpriteMaterial,
-  TextureLoader
+  SpriteMaterial
 } from "three";
 import { TextureManager } from "../TextureManager";
 
@@ -58,9 +53,9 @@ export class Particle extends Object3D {
       blending: AdditiveBlending,
       depthTest: true,
       depthWrite: true,
-      transparent: true
+      transparent: true,
+      fog: true
     });
-    material.fog = true;
     const mesh = new Sprite(material);
 
     this.add(mesh);
@@ -120,7 +115,7 @@ export class Particle extends Object3D {
     const maxD: number = 1 - this._count / this.life;
     const sizeNew: number = 1 - (this._count / this.life) * this.vSize;
 
-    this.alpha = Math.random() * 0.2 + this.baseAlpha * maxD;
+    this.alpha = Math.random() * 0.3 + this.baseAlpha * maxD;
 
     this.scaleValue = sizeNew * MAX_PARTICLE_SIZE;
 
