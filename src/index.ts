@@ -1,11 +1,13 @@
-import { World } from "./view3d/World";
 import * as dat from "dat.gui";
 import { DebugInfo } from "./view3d/data/DebugInfo";
 
-let world: World;
+let world: any;
 let worker: any;
-let enabledOffscreenCanvas =
+const enabledOffscreenCanvas =
   "transferControlToOffscreen" in document.createElement("canvas");
+
+// const enabledOffscreenCanvas = false;
+
 const USE_DEBUG: boolean = false;
 
 // ------------------------------------
@@ -13,7 +15,6 @@ const USE_DEBUG: boolean = false;
 // ------------------------------------
 // カスタマイズパラメーターの定義
 const visibleInfo = new DebugInfo();
-const _debugInfo = visibleInfo;
 if (USE_DEBUG) {
   // GUIパラメータの準備
   const gui = new dat.GUI();
@@ -22,17 +23,11 @@ if (USE_DEBUG) {
   gui.add(visibleInfo, "particles");
   gui.add(visibleInfo, "clouds");
   gui.add(visibleInfo, "waves");
-  gui.add(visibleInfo, "title").onChange(flag => {
-    // 強引に参照
-    const title = document.querySelector("#mainTitle") as HTMLElement;
-    // 表示を切り替える
-    title.className = flag ? "show" : "";
-  });
   gui.closed = true; // 閉じておく
 }
 
 // DOM構築後に実行開始
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", async () => {
   const canvas = document.querySelector("canvas") as HTMLCanvasElement;
   const params = {
     visibleInfo
@@ -60,6 +55,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
     worker.postMessage(size);
   } else {
+    // @ts-ignore
+    const { World } = await import("./view3d/World");
     // コンテンツを再生します。
     world = new World({
       // 普通のCanvas要素を送る
