@@ -1,8 +1,15 @@
 module.exports = {
   mode: 'development',
+  entry: {
+    main: "./src/index.ts",
+    worker: "./src/worker.ts",
+  },
   // 出力フォルダー
   output: {
     path: __dirname + '/docs',
+    // 出力ファイル名
+    filename: '[name].js'
+
   },
   module: {
     rules: [
@@ -28,9 +35,10 @@ module.exports = {
     ],
   },
   devtool: 'source-map',
-  serve: {
-    open: true,
-    content: 'docs/',
-    port: 5000
-  },
+  // ローカル開発用環境を立ち上げる
+  // 実行時にブラウザが自動的に localhost を開く
+  devServer: {
+    contentBase: 'docs/',
+    open: true
+  }
 };

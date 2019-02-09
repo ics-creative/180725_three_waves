@@ -1,19 +1,25 @@
-import { Texture, TextureLoader } from "three";
+import { Texture } from "three";
 
 import * as ImageCircle from "../assets/circle.png";
 import * as ImageCircleBorder from "../assets/circle_border.png";
 import * as ImageParticle from "../assets/fire_particle.png";
+import { toTexture } from "./utils/ThreeAssetUtil";
 
 /**
  * テクスチャーを一元管理するためのクラスです。
  */
 export class TextureManager {
+  static async init() {
+    TextureManager.circle = await toTexture(ImageCircle);
+    TextureManager.circle_border = await toTexture(ImageCircleBorder);
+    TextureManager.fire_particle = await toTexture(ImageParticle);
+  }
   /** ●模様のテクスチャーです。 */
-  static circle: Texture = new TextureLoader().load(ImageCircle);
+  static circle: Texture;
 
   /** ◯模様のテクスチャーです。 */
-  static circle_border: Texture = new TextureLoader().load(ImageCircleBorder);
+  static circle_border: Texture;
 
   /** もやっとした◎模様のテクスチャーです。 */
-  static fire_particle: Texture = new TextureLoader().load(ImageParticle);
+  static fire_particle: Texture;
 }

@@ -6,7 +6,6 @@ import {
   Vector3,
   WebGLRenderer
 } from "three";
-import * as dat from "dat.gui";
 
 import { BigParticleGroup } from "./particles/BigParticleGroup";
 import { DustParticleGroup } from "./objects/DustParticleGroup";
@@ -15,8 +14,7 @@ import { DebugInfo } from "./data/DebugInfo";
 import { Earth } from "./objects/Earth";
 import { WaveLines } from "./lines/WaveLines";
 import { BackGround } from "./objects/BackGround";
-
-const USE_DEBUG: boolean = true;
+import { TextureManager } from "./TextureManager";
 
 /**
  * 空間の登場人物を管理するためのインターフェースです。
@@ -38,37 +36,28 @@ interface IThreeObjects {
  * メインの3D管理クラスです。
  */
 export class World {
-  private readonly scene: Scene;
-  private readonly camera: PerspectiveCamera;
-  private readonly renderer: WebGLRenderer;
+  private scene: Scene;
+  private camera: PerspectiveCamera;
+  private renderer: WebGLRenderer;
 
-  private readonly _objects: IThreeObjects;
-  private readonly _debugInfo: DebugInfo;
+  private _objects: IThreeObjects;
+  private _debugInfo: DebugInfo;
   private _needResize: boolean = false;
+  private _width: number;
+  private _height: number;
+  private _devicePixelRatio: number;
 
-  constructor() {
-    // ------------------------------------
-    // デバッグのための情報を定義
-    // ------------------------------------
-    // カスタマイズパラメーターの定義
-    const visibleInfo = new DebugInfo();
+  constructor({ canvas, visibleInfo }) {
     this._debugInfo = visibleInfo;
-    if (USE_DEBUG === true) {
-      // GUIパラメータの準備
-      const gui = new dat.GUI();
-      gui.add(visibleInfo, "bg");
-      gui.add(visibleInfo, "earth");
-      gui.add(visibleInfo, "particles");
-      gui.add(visibleInfo, "clouds");
-      gui.add(visibleInfo, "waves");
-      gui.add(visibleInfo, "title").onChange(flag => {
-        // 強引に参照
-        const title = document.querySelector("#mainTitle") as HTMLElement;
-        // 表示を切り替える
-        title.className = flag ? "show" : "";
-      });
-      gui.closed = true; // 閉じておく
-    }
+
+    // Three.jsで使用する場合、内部でstyle.widthにアクセスするため指定する
+    canvas.style = { width: 0, height: 0 };
+
+    this.init({ canvas, visibleInfo });
+  }
+
+  private async init({ canvas, visibleInfo }) {
+    await TextureManager.init();
 
     // ------------------------------------
     // 3Dの初期化
@@ -76,8 +65,8 @@ export class World {
     {
       // レンダラーを作成
       this.renderer = new WebGLRenderer({
-        antialias: devicePixelRatio === 1.0,
-        canvas: document.querySelector("canvas")
+        antialias: false,
+        canvas
       });
 
       // シーンを作成
@@ -150,11 +139,6 @@ export class World {
       }
     }
 
-    window.addEventListener("resize", event => {
-      this.resize();
-    });
-    this.resize();
-
     this.tick(0);
   }
 
@@ -198,17 +182,23 @@ export class World {
     this.renderer.render(this.scene, this.camera);
   }
 
-  private resize(): void {
+  public resize({ width, height, devicePixelRatio }): void {
+    console.log(this);
+    this._width = width;
+    this._height = height;
+    this._devicePixelRatio = devicePixelRatio;
     this._needResize = true;
+    console.log(width, height, devicePixelRatio);
   }
+
   private resizeCore() {
     // サイズを取得
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    const width = this._width;
+    const height = this._height;
 
     // レンダラーのサイズを調整する
-    this.renderer.setPixelRatio(1);
-    // this.renderer.setPixelRatio(window.devicePixelRatio);
+    console.log(this.renderer);
+    this.renderer.setPixelRatio(this._devicePixelRatio);
     this.renderer.setSize(width, height);
 
     // カメラのアスペクト比を正す
