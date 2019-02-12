@@ -189,12 +189,10 @@ export class World {
   }
 
   public resize({ width, height, devicePixelRatio }): void {
-    console.log(this);
     this._width = width;
     this._height = height;
     this._devicePixelRatio = devicePixelRatio;
     this._needResize = true;
-    console.log(width, height, devicePixelRatio);
   }
 
   private resizeCore() {
@@ -203,7 +201,6 @@ export class World {
     const height = this._height;
 
     // レンダラーのサイズを調整する
-    console.log(this.renderer);
     this.renderer.setPixelRatio(this._devicePixelRatio);
     this.renderer.setSize(width, height);
 

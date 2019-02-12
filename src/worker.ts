@@ -1,10 +1,6 @@
 import { World } from "./view3d/World";
 
-declare function importScripts(...urls: string[]): void;
-
 onmessage = event => {
-  console.log("onmessage");
-
   switch (event.data.type) {
     case "init":
       init(event.data);
@@ -22,6 +18,5 @@ function init(data) {
 }
 
 function resize(data) {
-  console.log(data);
   world.resize(data);
 }

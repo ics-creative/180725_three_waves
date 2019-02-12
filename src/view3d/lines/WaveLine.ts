@@ -19,7 +19,7 @@ export class WaveLine extends Object3D {
         color: new Color().setHSL(
           0.6 + (j / maxLines) * 0.2,
           0.5,
-          0.3 + (k / step) * 0.5
+          0.2 + (k / step) * 0.4
         )
       });
       const geometry = new Geometry();
@@ -45,7 +45,7 @@ export class WaveLine extends Object3D {
 
       vertices.forEach((vertex, i) => {
         const y =
-          noise.perlin3(i / 100, (delta + k * 300) / 10000 + j * 300, 0) * 200;
+          noise.perlin3(i / 100, (delta + k * 50) / 10000 + j * 300, 0) * 200;
 
         vertex.setY(y);
       });

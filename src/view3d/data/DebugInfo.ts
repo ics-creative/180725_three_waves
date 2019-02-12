@@ -3,6 +3,6 @@ export class DebugInfo {
   earth: boolean = true;
   particles: boolean = true;
   clouds: boolean = true;
-  waves: boolean = false;
+  waves: boolean = true;
   title: boolean = true;
 }
