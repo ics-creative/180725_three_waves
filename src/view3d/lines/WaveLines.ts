@@ -1,6 +1,5 @@
 import { Group } from "three";
 import { WaveLine } from "./WaveLine";
-import * as noise from "simplenoise";
 
 export class WaveLines extends Group {
   private lines: WaveLine[];
@@ -27,7 +26,7 @@ export class WaveLines extends Group {
 
   public update(delta: number): void {
     this.lines.forEach((line, j) => {
-      line.update(delta, noise, j);
+      line.update(delta, j);
     });
   }
 }

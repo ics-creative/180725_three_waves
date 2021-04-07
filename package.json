@@ -9,13 +9,12 @@
   "license": "SEE LICENSE IN LICENSE",
   "private": true,
   "dependencies": {
-    "@types/three": "^0.127.0",
     "dat.gui": "^0.7.7",
-    "simplenoise": "^1.0.1",
     "three": "^0.124.0"
   },
   "devDependencies": {
     "@types/dat.gui": "^0.7.6",
+    "@types/three": "^0.127.0",
     "prettier": "^2.2.1",
     "ts-loader": "^8.1.0",
     "typescript": "^4.2.3",

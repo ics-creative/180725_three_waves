@@ -5,10 +5,12 @@ import {
   MeshPhongMaterial,
   PlaneGeometry,
 } from "three";
-import * as noise from "simplenoise";
+import { SimplexNoise } from "three/examples/jsm/math/SimplexNoise";
 
 const SEGMENT = 75;
 const LENGTH = 4000;
+
+const noise = new SimplexNoise();
 
 export class Earth extends Mesh {
   constructor() {
@@ -35,7 +37,7 @@ export class Earth extends Mesh {
       const col = index % (SEGMENT + 1);
       const row = Math.floor(index / (SEGMENT + 1));
 
-      const z = noise.perlin3(col / 20, row / 20, delta / 5000) * 200;
+      const z = noise.noise3d(col / 20, row / 20, delta / 5000) * 200;
 
       vertex.setZ(z);
     });

@@ -38,5 +38,7 @@ module.exports = {
   devServer: {
     contentBase: 'docs/',
     open: true
-  }
+  },
+  // ES5(IE11等)向けの指定
+  target: ["web", "es5"],
 };
