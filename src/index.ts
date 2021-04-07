@@ -27,9 +27,7 @@ if (USE_DEBUG) {
 // DOM構築後に実行開始
 window.addEventListener("DOMContentLoaded", async () => {
   const canvas = document.querySelector("canvas") as HTMLCanvasElement;
-  const params = {
-    visibleInfo,
-  };
+
   if (enabledOffscreenCanvas) {
     // Workerを作成し、OffscreenCanvasを渡す
     worker = new Worker("./worker.js");
@@ -40,7 +38,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         type: "init",
         // Canvas要素の描画コントロールをOffscreenCanvasに委譲する
         canvas: offscreenCanvas,
-        ...params,
+        visibleInfo,
       },
       [offscreenCanvas]
     );
@@ -52,8 +50,8 @@ window.addEventListener("DOMContentLoaded", async () => {
     // コンテンツを再生します。
     world = new World({
       // 普通のCanvas要素を送る
-      canvas: canvas,
-      ...params,
+      canvas,
+      visibleInfo,
     });
     world.resize(createSizeObject());
   }

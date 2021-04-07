@@ -38,8 +38,8 @@ interface IThreeObjects {
 export class World {
   private readonly scene: Scene;
   private readonly camera: PerspectiveCamera;
-  private renderer: WebGLRenderer;
-  private _objects: IThreeObjects;
+  private readonly renderer: WebGLRenderer;
+  private readonly _objects: IThreeObjects;
   private readonly _debugInfo: DebugInfo;
   private _needResize = false;
   private _width = 960;
@@ -56,9 +56,7 @@ export class World {
     this._debugInfo = visibleInfo;
 
     // Three.jsで使用する場合、内部でstyle.widthにアクセスするため指定する
-    if (canvas instanceof OffscreenCanvas) {
-      (canvas as any).style = { width: 0, height: 0 };
-    }
+    (canvas as any).style = { width: 0, height: 0 };
 
     // ------------------------------------
     // 3Dの初期化
