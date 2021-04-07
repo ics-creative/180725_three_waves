@@ -6,7 +6,7 @@ let worker: any;
 const enabledOffscreenCanvas =
   "transferControlToOffscreen" in document.createElement("canvas");
 
-const USE_DEBUG: boolean = false;
+const USE_DEBUG = false;
 
 // ------------------------------------
 // デバッグのための情報を定義

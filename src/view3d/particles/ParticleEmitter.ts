@@ -7,7 +7,7 @@ import { Particle } from "./Particle";
  */
 export class ParticleEmitter extends Emitter {
   public container: Group;
-  private PRE_CACHE_PARTICLES: number = 100;
+  private PRE_CACHE_PARTICLES = 100;
   private _particleActive: Particle[];
   private _particlePool: Particle[];
 

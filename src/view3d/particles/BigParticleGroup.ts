@@ -3,7 +3,7 @@ import { ParticleEmitter } from "./ParticleEmitter";
 
 export class BigParticleGroup extends Group {
   private _emitter: ParticleEmitter;
-  private _count: number = 0;
+  private _count = 0;
 
   constructor(numParticlesPerFrame: number) {
     super();
@@ -16,7 +16,7 @@ export class BigParticleGroup extends Group {
    * エンターフレームイベント
    * @param event
    */
-  public update(delta: number): void {
+  public update(delta:number): void {
     this._count++;
     if (this._count % 1 === 0) {
       // 手前ほどパーティックルの発生位置を狭める

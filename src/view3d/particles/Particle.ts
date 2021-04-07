@@ -13,19 +13,19 @@ const MAX_PARTICLE_SIZE = 100;
  * 粒子クラスです。
  */
 export class Particle extends Object3D {
-  public x: number = 0;
-  public y: number = 0;
-  public z: number = 0;
-  public alpha: number = 0;
-  public scaleValue: number = 0;
-  public vx: number = 0;
-  public vy: number = 0;
-  public vz: number = 0;
-  public life: number = 0;
-  public vSize: number = 0;
-  public baseAlpha: number = 0;
+  public x = 0;
+  public y = 0;
+  public z = 0;
+  public alpha = 0;
+  public scaleValue = 0;
+  public vx = 0;
+  public vy = 0;
+  public vz = 0;
+  public life = 0;
+  public vSize = 0;
+  public baseAlpha = 0;
 
-  private _count: number = 0;
+  private _count = 0;
   private _destroy: boolean;
 
   private _mesh: Sprite;

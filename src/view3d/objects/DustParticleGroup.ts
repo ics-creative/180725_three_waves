@@ -64,7 +64,7 @@ export class DustParticleGroup extends Group {
     this._geometry = geometry;
   }
 
-  public update(delta: number): void {
+  public update(delta:number): void {
     // 星を動かす
     this._geometry.vertices.map((vertex: Vector3, index: number) => {
       vertex.y += this._speedList[index];

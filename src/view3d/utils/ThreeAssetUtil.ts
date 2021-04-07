@@ -2,7 +2,7 @@ import { CanvasTexture, TextureLoader } from "three";
 
 export const toTexture = async (base64: string) => {
   if (typeof base64 !== "string") {
-    throw new Error(`引数が String 型ではありません.`);
+    throw new Error("引数が String 型ではありません.");
   }
   if (typeof document !== "undefined") {
     return new TextureLoader().load(base64);
@@ -18,7 +18,7 @@ export const toTexture = async (base64: string) => {
  */
 function toBlob(base64: string): Blob {
   if (typeof base64 !== "string") {
-    throw new Error(`引数が String 型ではありません.`);
+    throw new Error("引数が String 型ではありません.");
   }
   const bin = atob(base64.replace(/^.*,/, ""));
   const buffer = new Uint8Array(bin.length);

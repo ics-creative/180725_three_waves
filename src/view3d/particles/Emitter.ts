@@ -3,17 +3,17 @@
  */
 export class Emitter {
   /** 速度(X方向) */
-  public vy: number = 0;
+  public vy = 0;
   /** 速度(Y方向) */
-  public x: number = 0;
+  public x = 0;
   /** マウスのX座標 */
-  public latestY: number = 0;
+  public latestY = 0;
   /** マウスのY座標 */
-  public latestX: number = 0;
+  public latestX = 0;
   /** パーティクル発生のX座標 */
-  public y: number = 0;
+  public y = 0;
   /** パーティクル発生のY座標 */
-  public vx: number = 0;
+  public vx = 0;
 
   /**
    * @constructor

@@ -41,10 +41,10 @@ export class World {
   private renderer: WebGLRenderer;
   private _objects: IThreeObjects;
   private readonly _debugInfo: DebugInfo;
-  private _needResize: boolean = false;
-  private _width: number = 960;
-  private _height: number = 540;
-  private _devicePixelRatio: number = 1;
+  private _needResize = false;
+  private _width = 960;
+  private _height = 540;
+  private _devicePixelRatio = 1;
 
   constructor({
     canvas,
