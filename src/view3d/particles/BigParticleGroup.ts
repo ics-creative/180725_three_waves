@@ -16,7 +16,7 @@ export class BigParticleGroup extends Group {
    * エンターフレームイベント
    * @param event
    */
-  public update(delta:number): void {
+  public update(delta: number): void {
     this._count++;
     if (this._count % 1 === 0) {
       // 手前ほどパーティックルの発生位置を狭める
