@@ -4,7 +4,7 @@ import {
   Group,
   Points,
   PointsMaterial,
-  Vector3
+  Vector3,
 } from "three";
 import { TextureManager } from "../TextureManager";
 
@@ -53,7 +53,7 @@ export class DustParticleGroup extends Group {
       transparent: true,
       depthTest: true,
       depthWrite: true,
-      map: texture
+      map: texture,
     });
 
     // 物体を作成

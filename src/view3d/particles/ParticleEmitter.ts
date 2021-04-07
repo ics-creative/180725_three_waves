@@ -54,7 +54,7 @@ export class ParticleEmitter extends Emitter {
   public update() {
     super.update();
 
-    this._particleActive.forEach(p => {
+    this._particleActive.forEach((p) => {
       if (!p.getIsDead()) {
         p.update();
       } else {
@@ -114,7 +114,7 @@ export class ParticleEmitter extends Emitter {
    */
   private fromPool(): Particle {
     return this._particlePool.length > 0
-      ? this._particlePool.shift()
+      ? (this._particlePool.shift() as Particle)
       : new Particle();
   }
 

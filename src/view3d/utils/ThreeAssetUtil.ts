@@ -1,6 +1,9 @@
 import { CanvasTexture, TextureLoader } from "three";
 
 export const toTexture = async (base64: string) => {
+  if (typeof base64 !== "string") {
+    throw new Error(`引数が String 型ではありません.`);
+  }
   if (typeof document !== "undefined") {
     return new TextureLoader().load(base64);
   } else {
@@ -11,24 +14,21 @@ export const toTexture = async (base64: string) => {
 };
 
 /**
- *
  * @param base64
  */
 function toBlob(base64: string): Blob {
+  if (typeof base64 !== "string") {
+    throw new Error(`引数が String 型ではありません.`);
+  }
   const bin = atob(base64.replace(/^.*,/, ""));
   const buffer = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) {
     buffer[i] = bin.charCodeAt(i);
   }
-  let blob;
+
   // Blobを作成
-  try {
-    blob = new Blob([buffer.buffer], {
-      type: "image/png"
-    });
-  } catch (e) {
-    console.error(e);
-    return null;
-  }
+  const blob = new Blob([buffer.buffer], {
+    type: "image/png",
+  });
   return blob;
 }

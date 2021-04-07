@@ -10,9 +10,9 @@ import { toTexture } from "./utils/ThreeAssetUtil";
  */
 export class TextureManager {
   static async init() {
-    TextureManager.circle = await toTexture(ImageCircle);
-    TextureManager.circle_border = await toTexture(ImageCircleBorder);
-    TextureManager.fire_particle = await toTexture(ImageParticle);
+    TextureManager.circle = await toTexture(ImageCircle.default);
+    TextureManager.circle_border = await toTexture(ImageCircleBorder.default);
+    TextureManager.fire_particle = await toTexture(ImageParticle.default);
   }
   /** ●模様のテクスチャーです。 */
   static circle: Texture;

@@ -28,19 +28,19 @@ if (USE_DEBUG) {
 window.addEventListener("DOMContentLoaded", async () => {
   const canvas = document.querySelector("canvas") as HTMLCanvasElement;
   const params = {
-    visibleInfo
+    visibleInfo,
   };
   if (enabledOffscreenCanvas) {
     // Workerを作成し、OffscreenCanvasを渡す
     worker = new Worker("./worker.js");
 
-    const offscreenCanvas = canvas["transferControlToOffscreen"]();
+    const offscreenCanvas = canvas.transferControlToOffscreen();
     worker.postMessage(
       {
         type: "init",
         // Canvas要素の描画コントロールをOffscreenCanvasに委譲する
         canvas: offscreenCanvas,
-        ...params
+        ...params,
       },
       [offscreenCanvas]
     );
@@ -53,13 +53,13 @@ window.addEventListener("DOMContentLoaded", async () => {
     world = new World({
       // 普通のCanvas要素を送る
       canvas: canvas,
-      ...params
+      ...params,
     });
     world.resize(createSizeObject());
   }
 });
 
-window.addEventListener("resize", event => {
+window.addEventListener("resize", (event) => {
   if (enabledOffscreenCanvas) {
     worker.postMessage(createSizeObject());
   } else {
@@ -67,11 +67,14 @@ window.addEventListener("resize", event => {
   }
 });
 
-function createSizeObject() {
-  return {
-    type: "resize",
-    width: innerWidth,
-    height: innerHeight,
-    devicePixelRatio: devicePixelRatio
-  };
-}
+const createSizeObject = (): {
+  width: number;
+  type: "resize";
+  devicePixelRatio: number;
+  height: number;
+} => ({
+  type: "resize",
+  width: innerWidth,
+  height: innerHeight,
+  devicePixelRatio: devicePixelRatio,
+});

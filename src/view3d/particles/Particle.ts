@@ -3,7 +3,7 @@ import {
   Color,
   Object3D,
   Sprite,
-  SpriteMaterial
+  SpriteMaterial,
 } from "three";
 import { TextureManager } from "../TextureManager";
 
@@ -13,19 +13,19 @@ const MAX_PARTICLE_SIZE = 100;
  * 粒子クラスです。
  */
 export class Particle extends Object3D {
-  public x: number;
-  public y: number;
-  public z: number;
-  public alpha: number;
-  public scaleValue: number;
-  public vx: number;
-  public vy: number;
-  public vz: number;
-  public life: number;
-  public vSize: number;
-  public baseAlpha: number;
+  public x: number = 0;
+  public y: number = 0;
+  public z: number = 0;
+  public alpha: number = 0;
+  public scaleValue: number = 0;
+  public vx: number = 0;
+  public vy: number = 0;
+  public vz: number = 0;
+  public life: number = 0;
+  public vSize: number = 0;
+  public baseAlpha: number = 0;
 
-  private _count: number;
+  private _count: number = 0;
   private _destroy: boolean;
 
   private _mesh: Sprite;
@@ -40,7 +40,7 @@ export class Particle extends Object3D {
     const list = [
       TextureManager.circle,
       TextureManager.circle_border,
-      TextureManager.fire_particle
+      TextureManager.fire_particle,
     ];
 
     const material = new SpriteMaterial({
@@ -54,7 +54,7 @@ export class Particle extends Object3D {
       depthTest: true,
       depthWrite: true,
       transparent: true,
-      fog: true
+      fog: true,
     });
     const mesh = new Sprite(material);
 

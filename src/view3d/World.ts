@@ -4,7 +4,7 @@ import {
   PerspectiveCamera,
   Scene,
   Vector3,
-  WebGLRenderer
+  WebGLRenderer,
 } from "three";
 
 import { BigParticleGroup } from "./particles/BigParticleGroup";
@@ -21,43 +21,44 @@ import { TextureManager } from "./TextureManager";
  */
 interface IThreeObjects {
   /** 地面 */
-  earth: Earth;
+  earth: Earth | null;
   /** 背景 */
-  bg: BackGround;
+  bg: BackGround | null;
   /** 波模様 */
-  waveLines: WaveLines;
+  waveLines: WaveLines | null;
   /** 画面中央に発生するでかい粒子 */
-  bigParticleGroup: BigParticleGroup;
+  bigParticleGroup: BigParticleGroup | null;
   /** 塵のように発生する微粒子 */
-  dustParticleGroup: DustParticleGroup;
+  dustParticleGroup: DustParticleGroup | null;
 }
 
 /**
  * メインの3D管理クラスです。
  */
 export class World {
-  private scene: Scene;
-  private camera: PerspectiveCamera;
+  private readonly scene: Scene;
+  private readonly camera: PerspectiveCamera;
   private renderer: WebGLRenderer;
-
   private _objects: IThreeObjects;
-  private _debugInfo: DebugInfo;
+  private readonly _debugInfo: DebugInfo;
   private _needResize: boolean = false;
-  private _width: number;
-  private _height: number;
-  private _devicePixelRatio: number;
+  private _width: number = 960;
+  private _height: number = 540;
+  private _devicePixelRatio: number = 1;
 
-  constructor({ canvas, visibleInfo }) {
+  constructor({
+    canvas,
+    visibleInfo,
+  }: {
+    canvas: HTMLCanvasElement | OffscreenCanvas;
+    visibleInfo: DebugInfo;
+  }) {
     this._debugInfo = visibleInfo;
 
     // Three.jsで使用する場合、内部でstyle.widthにアクセスするため指定する
-    canvas.style = { width: 0, height: 0 };
-
-    this.init({ canvas, visibleInfo });
-  }
-
-  private async init({ canvas, visibleInfo }) {
-    await TextureManager.init();
+    if (canvas instanceof OffscreenCanvas) {
+      (canvas as any).style = { width: 0, height: 0 };
+    }
 
     // ------------------------------------
     // 3Dの初期化
@@ -66,7 +67,7 @@ export class World {
       // レンダラーを作成
       this.renderer = new WebGLRenderer({
         antialias: false,
-        canvas
+        canvas,
       });
 
       // シーンを作成
@@ -90,15 +91,26 @@ export class World {
     // ------------------------------------
     // 3D上の登場人物を配置
     // ------------------------------------
+    const objects: IThreeObjects = {
+      earth: null,
+      bg: null,
+      waveLines: null,
+      bigParticleGroup: null,
+      dustParticleGroup: null,
+    };
+    this._objects = objects;
+
+    this.init();
+  }
+
+  private async init() {
+    await TextureManager.init();
+
+    // ------------------------------------
+    // 3D上の登場人物を配置
+    // ------------------------------------
     {
-      const objects: IThreeObjects = {
-        earth: null,
-        bg: null,
-        waveLines: null,
-        bigParticleGroup: null,
-        dustParticleGroup: null
-      };
-      this._objects = objects;
+      const objects = this._objects;
 
       {
         // 地面を作成
@@ -144,7 +156,7 @@ export class World {
 
   private _count = 0;
   private tick(delta: number): void {
-    requestAnimationFrame(delta => {
+    requestAnimationFrame((delta) => {
       this.tick(delta);
     });
 
@@ -157,6 +169,23 @@ export class World {
       this.camera.position.x = Math.cos(Date.now() / 3000) * 50;
       this.camera.position.y = Math.sin(Date.now() / 5000) * 100 + 50;
       this.camera.lookAt(new Vector3(0, 0, 0));
+    }
+
+    // TypeScriptの型絞り込みのため
+    if (!this._objects.bg) {
+      return;
+    }
+    if (!this._objects.bigParticleGroup) {
+      return;
+    }
+    if (!this._objects.dustParticleGroup) {
+      return;
+    }
+    if (!this._objects.earth) {
+      return;
+    }
+    if (!this._objects.waveLines) {
+      return;
     }
 
     {
@@ -188,7 +217,15 @@ export class World {
     this.renderer.render(this.scene, this.camera);
   }
 
-  public resize({ width, height, devicePixelRatio }): void {
+  public resize({
+    width,
+    height,
+    devicePixelRatio,
+  }: {
+    width: number;
+    devicePixelRatio: number;
+    height: number;
+  }): void {
     this._width = width;
     this._height = height;
     this._devicePixelRatio = devicePixelRatio;
@@ -211,6 +248,6 @@ export class World {
     // 背景の縦横比を調整
     const sx = width / height;
     const sy = 1.0;
-    this._objects.bg.scale.set(sx, sy, 1.0);
+    this._objects.bg?.scale.set(sx, sy, 1.0);
   }
 }

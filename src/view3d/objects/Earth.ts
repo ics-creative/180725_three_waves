@@ -3,7 +3,7 @@ import {
   Color,
   Mesh,
   MeshPhongMaterial,
-  PlaneGeometry
+  PlaneGeometry,
 } from "three";
 import * as noise from "simplenoise";
 
@@ -22,7 +22,7 @@ export class Earth extends Mesh {
     const material = new MeshPhongMaterial({
       color: new Color().setHSL(0.7, 0.5, 0.5),
       blending: AdditiveBlending,
-      wireframe: true
+      wireframe: true,
     });
     super(geometry, material);
   }

@@ -21,11 +21,10 @@ module.exports = {
       },
       {
         // 対象となるファイルの拡張子
-        test: /\.(jpg|png)$/,
+        test: /\.(gif|png|jpg|eot|wof|woff|ttf|svg)$/,
         // 画像をBase64として取り込む
-        loader: 'url-loader'
-      }
-
+        type: "asset/inline",
+      },
     ]
   },
   // import 文で .ts ファイルを解決するため

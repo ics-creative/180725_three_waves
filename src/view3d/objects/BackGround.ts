@@ -3,7 +3,7 @@ import {
   Group,
   Mesh,
   MeshBasicMaterial,
-  PlaneGeometry
+  PlaneGeometry,
 } from "three";
 import { toTexture } from "../utils/ThreeAssetUtil";
 import * as ImageBg from "../../assets/bg.png";
@@ -18,11 +18,11 @@ export class BackGround extends Group {
     // 背景を作成
     const geometry = new PlaneGeometry(700, 700);
     const material = new MeshBasicMaterial({
-      map: await toTexture(ImageBg),
+      map: await toTexture(ImageBg.default),
       blending: AdditiveBlending,
       transparent: true,
       depthTest: false,
-      depthWrite: false
+      depthWrite: false,
     });
 
     const mesh = new Mesh(geometry, material);

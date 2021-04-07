@@ -4,8 +4,9 @@ import {
   Line,
   LineBasicMaterial,
   Object3D,
-  Vector3
+  Vector3,
 } from "three";
+import { SimplexNoise } from "three/examples/jsm/math/SimplexNoise";
 
 export class WaveLine extends Object3D {
   private lines: Line[];
@@ -14,19 +15,19 @@ export class WaveLine extends Object3D {
 
     this.lines = [];
 
-    [...Array(step).keys()].forEach(k => {
+    [...Array(step).keys()].forEach((k) => {
       const material = new LineBasicMaterial({
         color: new Color().setHSL(
           0.6 + (j / maxLines) * 0.2,
           0.5,
           0.2 + (k / step) * 0.4
-        )
+        ),
       });
       const geometry = new Geometry();
 
       const max = 200;
 
-      [...Array(max).keys()].forEach(i => {
+      [...Array(max).keys()].forEach((i) => {
         geometry.vertices.push(
           new Vector3((max / 2 - i) * 10, 0, (j - maxLines / 2) * 100 + 500)
         );
@@ -38,7 +39,7 @@ export class WaveLine extends Object3D {
     });
   }
 
-  public update(delta: number, noise, j: number): void {
+  public update(delta: number, noise: SimplexNoise, j: number): void {
     this.lines.forEach((line, k) => {
       const geometry = line.geometry as Geometry;
       const vertices = geometry.vertices;
