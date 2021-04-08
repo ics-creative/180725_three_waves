@@ -13,16 +13,17 @@ onmessage = (event) => {
 };
 
 let world: World;
-function init(data: { canvas: OffscreenCanvas; visibleInfo: DebugInfo }) {
+const init = (data: { canvas: OffscreenCanvas; visibleInfo: DebugInfo }) => {
   // コンテンツを再生します。
   world = new World(data);
-}
+};
 
-function resize(data: {
+const resize = (data: {
   width: number;
   type: "resize";
   devicePixelRatio: number;
   height: number;
-}) {
+  enabledMotion: boolean;
+}) => {
   world.resize(data);
-}
+};

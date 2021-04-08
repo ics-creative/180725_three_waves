@@ -6,6 +6,9 @@ let worker: any;
 const enabledOffscreenCanvas =
   "transferControlToOffscreen" in document.createElement("canvas");
 
+const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+const enabledMotion = Boolean(mediaQuery.matches);
+
 const USE_DEBUG = false;
 
 // ------------------------------------
@@ -39,11 +42,10 @@ window.addEventListener("DOMContentLoaded", async () => {
         // Canvas要素の描画コントロールをOffscreenCanvasに委譲する
         canvas: offscreenCanvas,
         visibleInfo,
+        enabledMotion,
       },
       [offscreenCanvas]
     );
-
-    worker.postMessage(createSizeObject());
   } else {
     // @ts-ignore
     const { World } = await import("./view3d/World");
@@ -53,26 +55,41 @@ window.addEventListener("DOMContentLoaded", async () => {
       canvas,
       visibleInfo,
     });
-    world.resize(createSizeObject());
   }
+  resize();
 });
 
-window.addEventListener("resize", (event) => {
+const resize = () => {
+  const obj = createSizeObject();
   if (enabledOffscreenCanvas) {
-    worker.postMessage(createSizeObject());
+    worker.postMessage(obj);
   } else {
-    world.resize(createSizeObject());
+    world.resize(obj);
   }
-});
+
+  const dom = document.querySelector(".reduceMotionWarn");
+  if (obj.enabledMotion) {
+    dom?.setAttribute("hidden", "true");
+  } else {
+    dom?.removeAttribute("hidden");
+  }
+};
+
+window.addEventListener("resize", resize);
+if (mediaQuery) {
+  mediaQuery.addEventListener("change", resize);
+}
 
 const createSizeObject = (): {
   width: number;
   type: "resize";
   devicePixelRatio: number;
   height: number;
+  enabledMotion: boolean;
 } => ({
   type: "resize",
   width: innerWidth,
   height: innerHeight,
   devicePixelRatio: devicePixelRatio,
+  enabledMotion: !Boolean(mediaQuery?.matches),
 });

@@ -42,9 +42,11 @@ export class World {
   private readonly _objects: IThreeObjects;
   private readonly _debugInfo: DebugInfo;
   private _needResize = false;
+  private _needRender = true;
   private _width = 960;
   private _height = 540;
   private _devicePixelRatio = 1;
+  private _enabledMotion: boolean = true;
 
   constructor({
     canvas,
@@ -149,18 +151,20 @@ export class World {
       }
     }
 
-    this.tick(0);
+    this.tick = this.tick.bind(this);
+    // テクスチャーの転送が終わっていないのでやむなく
+    setTimeout(() => {
+      this.tick(0);
+    }, 16);
   }
 
   private _count = 0;
   private tick(delta: number): void {
-    requestAnimationFrame((delta) => {
-      this.tick(delta);
-    });
+    requestAnimationFrame(this.tick);
 
-    if (this._count++ % 2 === 0) {
-      return;
-    }
+    // if (this._count++ % 2 === 0) {
+    //   return;
+    // }
 
     {
       // カメラを動かす
@@ -212,22 +216,32 @@ export class World {
     }
 
     // 描画
-    this.renderer.render(this.scene, this.camera);
+    if (this._needRender) {
+      this.renderer.render(this.scene, this.camera);
+    }
+
+    if (this._enabledMotion === false) {
+      this._needRender = false;
+    }
   }
 
   public resize({
     width,
     height,
     devicePixelRatio,
+    enabledMotion,
   }: {
     width: number;
     devicePixelRatio: number;
     height: number;
+    enabledMotion: boolean;
   }): void {
     this._width = width;
     this._height = height;
     this._devicePixelRatio = devicePixelRatio;
     this._needResize = true;
+    this._needRender = true;
+    this._enabledMotion = enabledMotion;
   }
 
   private resizeCore() {
