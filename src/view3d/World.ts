@@ -162,9 +162,10 @@ export class World {
   private tick(delta: number): void {
     requestAnimationFrame(this.tick);
 
-    // if (this._count++ % 2 === 0) {
-    //   return;
-    // }
+    // 負荷軽減のためやむなく
+    if (this._count++ % 2 === 0) {
+      return;
+    }
 
     {
       // カメラを動かす
