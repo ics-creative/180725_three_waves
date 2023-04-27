@@ -19,10 +19,17 @@
       height: 100vh !important;
     }
 
-    .reduceMotionWarn {
-      position: absolute;
+    .note {
       bottom: 8px;
       right: 8px;
+      position: absolute;
+      display: flex;
+      gap: 4px;
+      flex-direction: column;
+      align-items: flex-end
+    }
+
+    .offscreenMessage,.reduceMotionWarn {
       background-color: rgba(0, 0, 0, 0.5);
       padding: 4px 8px;
       color: rgba(255, 255, 255, 0.75);
@@ -34,6 +41,9 @@
 </head>
 <body>
   <canvas class="myCanvas"></canvas>
-  <div class="reduceMotionWarn" hidden>OSの設定に応じて、モーションを無効にしています</div>
+  <div class="note">
+    <div class="reduceMotionWarn" hidden>OSの設定に応じて、モーションを無効にしています</div>
+    <div class="offscreenMessage" hidden>負荷分散のためオフスクリーンキャンバスで描いています</div>
+  </div>
 </body>
 </html>

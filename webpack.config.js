@@ -1,3 +1,6 @@
+const TerserPlugin = require('terser-webpack-plugin');
+
+
 module.exports = {
   mode: 'development',
   entry: {
@@ -26,6 +29,13 @@ module.exports = {
       },
     ],
   },
+  optimization: {
+    // LICENSE.txt を出力しない
+    minimizer: [new TerserPlugin({
+      extractComments: false,
+    })],
+  },
+
   // import 文で .ts ファイルを解決するため
   resolve: {
     extensions: ['.ts', '.js', '.json'],

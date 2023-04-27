@@ -111,3 +111,12 @@ const createSizeObject = (): {
   devicePixelRatio: devicePixelRatio,
   enabledMotion: !Boolean(mediaQuery?.matches),
 });
+
+{
+  const dom = document.querySelector(".offscreenMessage");
+  if (enabledOffscreenCanvas) {
+    dom?.removeAttribute("hidden");
+  } else {
+    dom?.setAttribute("hidden", "true");
+  }
+}
