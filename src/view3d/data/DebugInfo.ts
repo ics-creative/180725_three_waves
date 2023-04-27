@@ -1,8 +1,8 @@
-export class DebugInfo {
-  bg = true;
-  earth = true;
-  particles = true;
-  clouds = true;
-  waves = true;
-  title = true;
-}
+export type DebugInfo = {
+  bg: boolean;
+  earth: boolean;
+  particles: boolean;
+  clouds: boolean;
+  waves: boolean;
+  title: boolean;
+};

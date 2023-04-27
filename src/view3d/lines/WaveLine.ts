@@ -1,6 +1,7 @@
 import {
+  BufferAttribute,
+  BufferGeometry,
   Color,
-  Geometry,
   Line,
   LineBasicMaterial,
   Object3D,
@@ -25,15 +26,18 @@ export class WaveLine extends Object3D {
           0.2 + (k / step) * 0.4
         ),
       });
-      const geometry = new Geometry();
+      const geometry = new BufferGeometry();
+
+      const points: Vector3[] = [];
 
       const max = 200;
 
       [...Array(max).keys()].forEach((i) => {
-        geometry.vertices.push(
+        points.push(
           new Vector3((max / 2 - i) * 10, 0, (j - maxLines / 2) * 100 + 500)
         );
       });
+      geometry.setFromPoints(points);
 
       const line = new Line(geometry, material);
       this.add(line);
@@ -43,16 +47,17 @@ export class WaveLine extends Object3D {
 
   public update(delta: number, j: number): void {
     this.lines.forEach((line, k) => {
-      const geometry = line.geometry as Geometry;
-      const vertices = geometry.vertices;
+      const geometry = line.geometry;
+      const attributesPosition = geometry.attributes
+        .position as BufferAttribute;
 
-      vertices.forEach((vertex, i) => {
-        const y =
+      for (let i = 0; i < attributesPosition.count; i++) {
+        const nextY =
           noise.noise3d(i / 100, (delta + k * 50) / 10000 + j * 300, 0) * 200;
 
-        vertex.setY(y);
-      });
-      geometry.verticesNeedUpdate = true;
+        attributesPosition.setY(i, nextY);
+      }
+      attributesPosition.needsUpdate = true;
     });
   }
 }

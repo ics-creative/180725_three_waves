@@ -1,6 +1,7 @@
 import {
   AdditiveBlending,
-  Geometry,
+  BufferAttribute,
+  BufferGeometry,
   Group,
   Points,
   PointsMaterial,
@@ -12,7 +13,7 @@ import { TextureManager } from "../TextureManager";
  * 塵のようなパーティクルです。
  */
 export class DustParticleGroup extends Group {
-  private _geometry: Geometry;
+  private _geometry: BufferGeometry;
   private _speedList: number[] = [];
 
   /**
@@ -31,11 +32,12 @@ export class DustParticleGroup extends Group {
     super();
 
     // 形状データを作成
-    const geometry = new Geometry();
+    const geometry = new BufferGeometry();
     const numParticles = particleNum;
     const SIZE = 3000;
+    const points: Vector3[] = [];
     for (let i = 0; i < numParticles; i++) {
-      geometry.vertices.push(
+      points.push(
         new Vector3(
           SIZE * (Math.random() - 0.5),
           yVariance * Math.random() + yStart,
@@ -45,6 +47,8 @@ export class DustParticleGroup extends Group {
 
       this._speedList[i] = Math.random() * Math.random();
     }
+    geometry.setFromPoints(points);
+
     // マテリアルを作成
     const texture = TextureManager.circle;
     const material = new PointsMaterial({
@@ -65,16 +69,25 @@ export class DustParticleGroup extends Group {
   }
 
   public update(delta: number): void {
-    // 星を動かす
-    this._geometry.vertices.map((vertex: Vector3, index: number) => {
-      vertex.y += this._speedList[index];
+    const attributesPosition = this._geometry.attributes
+      .position as BufferAttribute;
 
-      if (vertex.y > this.yEnd) {
-        vertex.y = this.yStart;
+    // 星を動かす
+    const nextPositions: number[] = [];
+    for (let i = 0; i < attributesPosition.count; i++) {
+      const y = attributesPosition.getY(i);
+
+      const index = i / 3;
+      let nextY = y + this._speedList[index];
+
+      if (nextY > this.yEnd) {
+        nextY = this.yStart;
       }
-    });
+
+      attributesPosition.setY(i, nextY);
+    }
 
     // 更新するように指示を出しておく
-    this._geometry.verticesNeedUpdate = true;
+    attributesPosition.needsUpdate = true;
   }
 }

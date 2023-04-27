@@ -15,7 +15,14 @@ const USE_DEBUG = false;
 // デバッグのための情報を定義
 // ------------------------------------
 // カスタマイズパラメーターの定義
-const visibleInfo = new DebugInfo();
+const visibleInfo: DebugInfo = {
+  bg: true,
+  earth: true,
+  particles: true,
+  clouds: true,
+  waves: true,
+  title: true,
+};
 if (USE_DEBUG) {
   // GUIパラメータの準備
   const gui = new dat.GUI();
@@ -76,9 +83,7 @@ const resize = () => {
 };
 
 window.addEventListener("resize", resize);
-if (mediaQuery) {
-  mediaQuery.addEventListener("change", resize);
-}
+mediaQuery.addEventListener("change", resize);
 
 const createSizeObject = (): {
   width: number;

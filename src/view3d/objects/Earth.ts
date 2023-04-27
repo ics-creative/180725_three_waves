@@ -1,5 +1,6 @@
 import {
   AdditiveBlending,
+  BufferAttribute,
   Color,
   Mesh,
   MeshPhongMaterial,
@@ -31,16 +32,19 @@ export class Earth extends Mesh {
 
   update(delta: number) {
     const geometry = this.geometry as PlaneGeometry;
-    const vertices = geometry.vertices;
 
-    vertices.forEach((vertex, index) => {
-      const col = index % (SEGMENT + 1);
-      const row = Math.floor(index / (SEGMENT + 1));
+    const attributesPosition = geometry.attributes.position as BufferAttribute;
 
-      const z = noise.noise3d(col / 20, row / 20, delta / 5000) * 200;
+    for (let i = 0; i < attributesPosition.count; i++) {
+      const col = i % (SEGMENT + 1);
+      const row = Math.floor(i / (SEGMENT + 1));
 
-      vertex.setZ(z);
-    });
-    geometry.verticesNeedUpdate = true;
+      const nextZ = noise.noise3d(col / 20, row / 20, delta / 5000) * 200;
+
+      attributesPosition.setZ(i, nextZ);
+    }
+
+    // 更新するように指示を出しておく
+    attributesPosition.needsUpdate = true;
   }
 }
