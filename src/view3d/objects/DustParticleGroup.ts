@@ -77,8 +77,7 @@ export class DustParticleGroup extends Group {
     for (let i = 0; i < attributesPosition.count; i++) {
       const y = attributesPosition.getY(i);
 
-      const index = i / 3;
-      let nextY = y + this._speedList[index];
+      let nextY = y + this._speedList[i];
 
       if (nextY > this.yEnd) {
         nextY = this.yStart;
