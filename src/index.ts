@@ -3,8 +3,21 @@ import { DebugInfo } from "./view3d/data/DebugInfo";
 
 let world: any;
 let worker: any;
-const enabledOffscreenCanvas =
-  "transferControlToOffscreen" in document.createElement("canvas");
+
+/** OffscreenCanvas(WebGL)を利用できるか */
+const enabledOffscreenCanvas = (() => {
+  const hasT = "transferControlToOffscreen" in document.createElement("canvas");
+
+  if (!hasT) {
+    return false;
+  }
+
+  const canvas = document.createElement("canvas");
+  const offscreenCanvas = canvas.transferControlToOffscreen();
+  const gl = offscreenCanvas.getContext("webgl");
+
+  return gl != null;
+})();
 
 const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 const enabledMotion = Boolean(mediaQuery.matches);
