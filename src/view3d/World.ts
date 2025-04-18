@@ -4,8 +4,8 @@ import {
   PerspectiveCamera,
   Scene,
   Vector3,
-  WebGLRenderer,
 } from "three";
+import  { WebGPURenderer } from "three/webgpu";
 
 import { BigParticleGroup } from "./particles/BigParticleGroup";
 import { DustParticleGroup } from "./objects/DustParticleGroup";
@@ -38,7 +38,7 @@ interface IThreeObjects {
 export class World {
   private readonly scene: Scene;
   private readonly camera: PerspectiveCamera;
-  private readonly renderer: WebGLRenderer;
+  private renderer!: WebGPURenderer;
   private readonly _objects: IThreeObjects;
   private readonly _debugInfo: DebugInfo;
   private _needResize = false;
@@ -47,15 +47,17 @@ export class World {
   private _height = 540;
   private _devicePixelRatio = 1;
   private _enabledMotion: boolean = true;
+  private _canvas: OffscreenCanvas | HTMLCanvasElement;
 
   constructor({
-    canvas,
+     canvas,
     visibleInfo,
   }: {
-    canvas: HTMLCanvasElement | OffscreenCanvas;
+    canvas: OffscreenCanvas;
     visibleInfo: DebugInfo;
   }) {
     this._debugInfo = visibleInfo;
+    this._canvas = canvas;
 
     // Three.jsで使用する場合、内部でstyle.widthにアクセスするため指定する
     (canvas as any).style = { width: 0, height: 0 };
@@ -64,11 +66,7 @@ export class World {
     // 3Dの初期化
     // ------------------------------------
     {
-      // レンダラーを作成
-      this.renderer = new WebGLRenderer({
-        antialias: false,
-        canvas,
-      });
+
 
       // シーンを作成
       const scene = new Scene();
@@ -105,6 +103,13 @@ export class World {
 
   private async init() {
     await TextureManager.init();
+
+    // レンダラーを作成
+    this.renderer = new WebGPURenderer({
+      antialias: false,
+      canvas: this._canvas as HTMLCanvasElement,
+    });
+    await this.renderer.init();
 
     // ------------------------------------
     // 3D上の登場人物を配置
@@ -163,9 +168,9 @@ export class World {
     requestAnimationFrame(this.tick);
 
     // 負荷軽減のためやむなく
-    if (this._count++ % 2 === 0) {
-      return;
-    }
+    // if (this._count++ % 2 === 0) {
+    //   return;
+    // }
 
     {
       // カメラを動かす
