@@ -8,7 +8,8 @@ import {
 } from "three";
 import { SimplexNoise } from "three/examples/jsm/math/SimplexNoise.js";
 
-const SEGMENT = 75;
+// 変更: 解像度を上げる (75 -> 150)
+const SEGMENT = 150;
 const LENGTH = 4000;
 
 const noise = new SimplexNoise();
@@ -49,7 +50,7 @@ export class Earth extends Mesh {
 
       // 変更: 累積時間と係数を使って time を計算
       const time = this._elapsedTime * timeFactor;
-      const nextZ = noise.noise3d(col / 20, row / 20, time) * 200;
+      const nextZ = noise.noise3d(col / 40, row / 40, time) * 200;
 
       attributesPosition.setZ(i, nextZ);
     }
