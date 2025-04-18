@@ -5,7 +5,7 @@ import {
   Scene,
   Vector3,
 } from "three";
-import  { WebGPURenderer } from "three/webgpu";
+import { WebGPURenderer } from "three/webgpu";
 
 import { BigParticleGroup } from "./particles/BigParticleGroup";
 import { DustParticleGroup } from "./objects/DustParticleGroup";
@@ -46,17 +46,21 @@ export class World {
   private _width = 960;
   private _height = 540;
   private _devicePixelRatio = 1;
-  private _enabledMotion: boolean = true;
+  private _reducedMotionPreferred: boolean = true;
   private _canvas: OffscreenCanvas | HTMLCanvasElement;
+  private _lastTimestamp: number | null = null;
 
   constructor({
-     canvas,
+    canvas,
     visibleInfo,
+    enabledMotion,
   }: {
-    canvas: OffscreenCanvas;
+    canvas: HTMLCanvasElement | OffscreenCanvas;
     visibleInfo: DebugInfo;
+    enabledMotion: boolean;
   }) {
     this._debugInfo = visibleInfo;
+    this._reducedMotionPreferred = enabledMotion;
     this._canvas = canvas;
 
     // Three.jsで使用する場合、内部でstyle.widthにアクセスするため指定する
@@ -66,8 +70,6 @@ export class World {
     // 3Dの初期化
     // ------------------------------------
     {
-
-
       // シーンを作成
       const scene = new Scene();
       this.scene = scene;
@@ -164,70 +166,65 @@ export class World {
   }
 
   private _count = 0;
-  private tick(delta: number): void {
+  private tick(timestamp: number): void {
     requestAnimationFrame(this.tick);
 
-    // 負荷軽減のためやむなく
-    // if (this._count++ % 2 === 0) {
-    //   return;
-    // }
+    // デルタタイムを計算
+    let deltaTime = 0;
+    if (this._lastTimestamp !== null) {
+      deltaTime = (timestamp - this._lastTimestamp) / 1000;
+    } else {
+      deltaTime = 1 / 60; // 初回デフォルト
+    }
+    this._lastTimestamp = timestamp;
 
-    {
-      // カメラを動かす
+    // リサイズ処理
+    let needsResizeRender = false;
+    if (this._needResize) {
+      this.resizeCore();
+      this._needResize = false;
+      needsResizeRender = true;
+    }
+
+    let needsAnimationRender = false;
+    if (this._reducedMotionPreferred === true) {
+      // カメラ移動
       this.camera.position.x = Math.cos(Date.now() / 3000) * 50;
       this.camera.position.y = Math.sin(Date.now() / 5000) * 100 + 50;
       this.camera.lookAt(new Vector3(0, 0, 0));
+      needsAnimationRender = true;
+
+      // オブジェクト更新 (null チェックを含む)
+      if (
+        this._objects.bg &&
+        this._objects.bigParticleGroup &&
+        this._objects.dustParticleGroup &&
+        this._objects.earth &&
+        this._objects.waveLines
+      ) {
+        if (this._debugInfo.bg) this._objects.earth.update(deltaTime);
+        if (this._debugInfo.waves) this._objects.waveLines.update(deltaTime);
+        if (this._debugInfo.clouds)
+          this._objects.dustParticleGroup.update(deltaTime);
+        if (this._debugInfo.particles)
+          this._objects.bigParticleGroup.update(deltaTime);
+        this._objects.bg.lookAt(this.camera.position);
+        needsAnimationRender = true;
+
+        // 表示有無更新
+        if (this._debugInfo) {
+          this._objects.bg.visible = this._debugInfo.bg;
+          this._objects.bigParticleGroup.visible = this._debugInfo.particles;
+          this._objects.dustParticleGroup.visible = this._debugInfo.clouds;
+          this._objects.earth.visible = this._debugInfo.earth;
+          this._objects.waveLines.visible = this._debugInfo.waves;
+        }
+      }
     }
 
-    // TypeScriptの型絞り込みのため
-    if (!this._objects.bg) {
-      return;
-    }
-    if (!this._objects.bigParticleGroup) {
-      return;
-    }
-    if (!this._objects.dustParticleGroup) {
-      return;
-    }
-    if (!this._objects.earth) {
-      return;
-    }
-    if (!this._objects.waveLines) {
-      return;
-    }
-
-    {
-      // 登場人物の更新
-      if (this._debugInfo.bg) this._objects.earth.update(delta); // 地面のうねうね
-      if (this._debugInfo.waves) this._objects.waveLines.update(delta); // 波のうねうね
-      if (this._debugInfo.clouds) this._objects.dustParticleGroup.update(delta); // 昇天する粒子
-      if (this._debugInfo.particles)
-        this._objects.bigParticleGroup.update(delta); // 昇天する粒子
-
-      this._objects.bg.lookAt(this.camera.position); // 背景はカメラに向ける
-    }
-
-    // 表示有無を更新
-    if (this._debugInfo) {
-      this._objects.bg.visible = this._debugInfo.bg;
-      this._objects.bigParticleGroup.visible = this._debugInfo.particles;
-      this._objects.dustParticleGroup.visible = this._debugInfo.clouds;
-      this._objects.earth.visible = this._debugInfo.earth;
-      this._objects.waveLines.visible = this._debugInfo.waves;
-    }
-
-    if (this._needResize === true) {
-      this.resizeCore();
-      this._needResize = false;
-    }
-
-    // 描画
-    if (this._needRender) {
+    // 描画: リサイズがあった場合、またはアニメーションが実行された場合
+    if (needsResizeRender || needsAnimationRender) {
       this.renderer.render(this.scene, this.camera);
-    }
-
-    if (this._enabledMotion === false) {
-      this._needRender = false;
     }
   }
 
@@ -247,7 +244,7 @@ export class World {
     this._devicePixelRatio = devicePixelRatio;
     this._needResize = true;
     this._needRender = true;
-    this._enabledMotion = enabledMotion;
+    this._reducedMotionPreferred = enabledMotion;
   }
 
   private resizeCore() {

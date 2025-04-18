@@ -68,16 +68,19 @@ export class DustParticleGroup extends Group {
     this._geometry = geometry;
   }
 
-  public update(delta: number): void {
+  public update(deltaTime: number): void {
     const attributesPosition = this._geometry.attributes
       .position as BufferAttribute;
+    // 基準の速度係数 (60fps基準)
+    const baseSpeedFactor = 60;
 
     // 星を動かす
     const nextPositions: number[] = [];
     for (let i = 0; i < attributesPosition.count; i++) {
       const y = attributesPosition.getY(i);
 
-      let nextY = y + this._speedList[i];
+      // 変更: 移動量を deltaTime ベースに
+      let nextY = y + this._speedList[i] * deltaTime * baseSpeedFactor;
 
       if (nextY > this.yEnd) {
         nextY = this.yStart;

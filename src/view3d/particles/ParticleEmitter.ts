@@ -50,13 +50,12 @@ export class ParticleEmitter extends Emitter {
 
   /**
    * パーティクルを更新します。
+   * @param {number} deltaTime 前フレームからの経過時間（秒）
    */
-  public update() {
-    super.update();
-
+  public updateParticles(deltaTime: number) {
     this._particleActive.forEach((p) => {
       if (!p.getIsDead()) {
-        p.update();
+        p.update(deltaTime);
       } else {
         this.removeParticle(p);
       }

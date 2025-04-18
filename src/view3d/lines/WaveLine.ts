@@ -45,15 +45,22 @@ export class WaveLine extends Object3D {
     });
   }
 
-  public update(delta: number, j: number): void {
+  public update(deltaTime: number, j: number): void {
+    // 基準の速度係数 (60fps基準)
+    const baseSpeedFactor = 60;
+    // 時間のスケールを調整する係数 (元の / 10000 を基準に調整)
+    const timeScale = 100; // この値を調整して速度を変更
+
     this.lines.forEach((line, k) => {
       const geometry = line.geometry;
       const attributesPosition = geometry.attributes
         .position as BufferAttribute;
 
       for (let i = 0; i < attributesPosition.count; i++) {
-        const nextY =
-          noise.noise3d(i / 100, (delta + k * 50) / 10000 + j * 300, 0) * 200;
+        // 変更: ノイズ関数の時間入力部分を deltaTime ベースに調整
+        const time =
+          (deltaTime * baseSpeedFactor * timeScale + k * 50) / 10000 + j * 300;
+        const nextY = noise.noise3d(i / 100, time, 0) * 200;
 
         attributesPosition.setY(i, nextY);
       }

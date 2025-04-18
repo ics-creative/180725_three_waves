@@ -14,9 +14,9 @@ export class BigParticleGroup extends Group {
 
   /**
    * エンターフレームイベント
-   * @param event
+   * @param {number} deltaTime 前フレームからの経過時間（秒）
    */
-  public update(delta: number): void {
+  public update(deltaTime: number): void {
     this._count++;
     if (this._count % 1 === 0) {
       // 手前ほどパーティックルの発生位置を狭める
@@ -34,6 +34,6 @@ export class BigParticleGroup extends Group {
       );
     }
 
-    this._emitter.update();
+    this._emitter.updateParticles(deltaTime);
   }
 }
