@@ -6,7 +6,7 @@ import {
   MeshPhongMaterial,
   PlaneGeometry,
 } from "three";
-import { SimplexNoise } from "three/examples/jsm/math/SimplexNoise";
+import { SimplexNoise } from "three/examples/jsm/math/SimplexNoise.js";
 
 const SEGMENT = 75;
 const LENGTH = 4000;

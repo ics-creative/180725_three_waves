@@ -49,11 +49,16 @@ if (USE_DEBUG) {
 
 // DOM構築後に実行開始
 window.addEventListener("DOMContentLoaded", async () => {
-  const canvas = document.querySelector("canvas") as HTMLCanvasElement;
+  const canvas = document.querySelector("#mainCanvas") as HTMLCanvasElement;
+
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 
   if (enabledOffscreenCanvas) {
     // Workerを作成し、OffscreenCanvasを渡す
-    worker = new Worker("./worker.js");
+    worker = new Worker(new URL("./worker.ts", import.meta.url), {
+      type: "module",
+    });
 
     const offscreenCanvas = canvas.transferControlToOffscreen();
     worker.postMessage(

@@ -7,7 +7,7 @@ import {
   Object3D,
   Vector3,
 } from "three";
-import { SimplexNoise } from "three/examples/jsm/math/SimplexNoise";
+import { SimplexNoise } from "three/examples/jsm/math/SimplexNoise.js";
 
 const noise = new SimplexNoise();
 
