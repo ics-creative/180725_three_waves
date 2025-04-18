@@ -13,7 +13,7 @@ onmessage = (event) => {
 };
 
 let world: World;
-const init = (data: { canvas: OffscreenCanvas; visibleInfo: DebugInfo }) => {
+const init = (data: { canvas: OffscreenCanvas; visibleInfo: DebugInfo, enabledMotion: boolean }) => {
   // コンテンツを再生します。
   world = new World(data);
 };
