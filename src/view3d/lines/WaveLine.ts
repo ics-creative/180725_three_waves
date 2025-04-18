@@ -23,7 +23,7 @@ export class WaveLine extends Object3D {
         color: new Color().setHSL(
           0.6 + (j / maxLines) * 0.2,
           0.5,
-          0.2 + (k / step) * 0.4
+          0.2 + (k / step) * 0.4,
         ),
       });
       const geometry = new BufferGeometry();
@@ -34,7 +34,7 @@ export class WaveLine extends Object3D {
 
       [...Array(max).keys()].forEach((i) => {
         points.push(
-          new Vector3((max / 2 - i) * 10, 0, (j - maxLines / 2) * 100 + 500)
+          new Vector3((max / 2 - i) * 10, 0, (j - maxLines / 2) * 100 + 500),
         );
       });
       geometry.setFromPoints(points);

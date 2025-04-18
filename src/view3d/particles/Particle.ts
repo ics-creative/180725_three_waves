@@ -47,7 +47,7 @@ export class Particle extends Object3D {
       color: new Color().setHSL(
         0.5 + Math.random() * 0.3,
         0.1,
-        0.5 + Math.random() * 0.5
+        0.5 + Math.random() * 0.5,
       ),
       map: list[Math.floor(list.length * Math.random())],
       blending: AdditiveBlending,
@@ -73,7 +73,7 @@ export class Particle extends Object3D {
     emitZ: number,
     startVx: number,
     startVy: number,
-    startVz: number
+    startVz: number,
   ): void {
     this.x = emitX;
     this.y = emitY;

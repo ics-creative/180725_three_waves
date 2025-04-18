@@ -15,7 +15,7 @@ export class WaveLines extends Group {
         const line = new WaveLine(
           j,
           maxLines,
-          Math.max(1, Math.round(j ** 3 / 60))
+          Math.max(1, Math.round(j ** 3 / 60)),
         );
         this.add(line);
         lines.push(line);

@@ -30,7 +30,7 @@ export class BigParticleGroup extends Group {
       this._emitter.emit(
         wide * (Math.random() - 0.5),
         200 * (Math.random() - 0.5) + -100,
-        distance
+        distance,
       );
     }
 

@@ -27,7 +27,7 @@ export class DustParticleGroup extends Group {
     particleNum: number,
     private yStart: number,
     private yEnd: number,
-    private yVariance: number
+    private yVariance: number,
   ) {
     super();
 
@@ -41,8 +41,8 @@ export class DustParticleGroup extends Group {
         new Vector3(
           SIZE * (Math.random() - 0.5),
           yVariance * Math.random() + yStart,
-          SIZE * (Math.random() - 0.5)
-        )
+          SIZE * (Math.random() - 0.5),
+        ),
       );
 
       this._speedList[i] = Math.random() * Math.random();

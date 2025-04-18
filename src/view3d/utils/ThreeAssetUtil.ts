@@ -1,16 +1,21 @@
-import { CanvasTexture, TextureLoader } from "three";
+import { CanvasTexture, TextureLoader, SRGBColorSpace } from "three";
 
 export const toTexture = async (base64: string) => {
   if (typeof base64 !== "string") {
     throw new Error("引数が String 型ではありません.");
   }
+
+  let texture;
   if (typeof document !== "undefined") {
-    return new TextureLoader().load(base64);
+    texture = new TextureLoader().load(base64);
   } else {
     const blob = toBlob(base64);
     const imageBitmap = await createImageBitmap(blob);
-    return new CanvasTexture(imageBitmap as any);
+    texture = new CanvasTexture(imageBitmap as any);
   }
+
+  texture.colorSpace = SRGBColorSpace;
+  return texture;
 };
 
 /**

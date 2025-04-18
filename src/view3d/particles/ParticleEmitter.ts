@@ -21,7 +21,7 @@ export class ParticleEmitter extends Emitter {
     private numParticles: number,
     private startVx: number,
     private startVy: number,
-    private startVz: number
+    private startVz: number,
   ) {
     super();
 
@@ -77,7 +77,7 @@ export class ParticleEmitter extends Emitter {
       emitZ,
       this.startVx,
       this.startVy,
-      this.startVz
+      this.startVz,
     );
     this._particleActive.push(particle);
     this.container.add(particle);

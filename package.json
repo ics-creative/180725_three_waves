@@ -10,16 +10,16 @@
   "private": true,
   "dependencies": {
     "dat.gui": "^0.7.9",
-    "three": "^0.151.3"
+    "three": "^0.175.0"
   },
   "devDependencies": {
-    "@types/dat.gui": "^0.7.9",
-    "@types/three": "^0.150.2",
-    "prettier": "^2.8.8",
-    "ts-loader": "^9.4.2",
-    "typescript": "^5.0.4",
-    "webpack": "^5.81.0",
-    "webpack-cli": "^5.0.2",
-    "webpack-dev-server": "^4.13.3"
+    "@types/dat.gui": "^0.7.13",
+    "@types/three": "^0.175.0",
+    "prettier": "^3.5.3",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.8.3",
+    "webpack": "^5.99.6",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.1"
   }
 }

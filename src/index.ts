@@ -64,7 +64,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         visibleInfo,
         enabledMotion,
       },
-      [offscreenCanvas]
+      [offscreenCanvas],
     );
   } else {
     // @ts-ignore

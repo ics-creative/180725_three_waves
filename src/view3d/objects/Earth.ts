@@ -20,7 +20,7 @@ export class Earth extends Mesh {
       LENGTH * 2,
       LENGTH * 2,
       SEGMENT,
-      SEGMENT
+      SEGMENT,
     );
     const material = new MeshPhongMaterial({
       color: new Color().setHSL(0.7, 0.5, 0.5),
