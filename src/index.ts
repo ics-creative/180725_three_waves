@@ -1,26 +1,9 @@
 import * as dat from "dat.gui";
 import { DebugInfo } from "./view3d/data/DebugInfo";
 
-let world: any;
-let worker: any;
-
-/** OffscreenCanvas(WebGL)を利用できるか */
-const enabledOffscreenCanvas = (() => {
-  const hasT = "transferControlToOffscreen" in document.createElement("canvas");
-
-  if (!hasT) {
-    return false;
-  }
-
-  const canvas = document.createElement("canvas");
-  const offscreenCanvas = canvas.transferControlToOffscreen();
-  const gl = offscreenCanvas.getContext("webgl");
-
-  return gl != null;
-})();
+let worker: Worker;
 
 const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-const enabledMotion = Boolean(mediaQuery.matches);
 
 const USE_DEBUG = false;
 
@@ -54,55 +37,41 @@ window.addEventListener("DOMContentLoaded", async () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
-  if (enabledOffscreenCanvas) {
-    // Workerを作成し、OffscreenCanvasを渡す
-    worker = new Worker(new URL("./worker.ts", import.meta.url), {
-      type: "module",
-    });
+  // Workerを作成し、OffscreenCanvasを渡す
+  worker = new Worker(new URL("./worker.ts", import.meta.url), {
+    type: "module",
+  });
 
-    const offscreenCanvas = canvas.transferControlToOffscreen();
-    worker.postMessage(
-      {
-        type: "init",
-        // Canvas要素の描画コントロールをOffscreenCanvasに委譲する
-        canvas: offscreenCanvas,
-        visibleInfo,
-        enabledMotion,
-      },
-      [offscreenCanvas],
-    );
-  } else {
-    // @ts-ignore
-    const { World } = await import("./view3d/World");
-    // コンテンツを再生します。
-    world = new World({
-      // 普通のCanvas要素を送る
-      canvas,
+  const offscreenCanvas = canvas.transferControlToOffscreen();
+  worker.postMessage(
+    {
+      type: "init",
+      canvas: offscreenCanvas,
       visibleInfo,
-    });
-  }
-  resize();
+    },
+    [offscreenCanvas],
+  );
+
+  resize(); // 初回リサイズ呼び出し
 });
 
 const resize = () => {
   const obj = createSizeObject();
-  if (enabledOffscreenCanvas) {
-    worker.postMessage(obj);
-  } else {
-    world.resize(obj);
-  }
+  worker.postMessage(obj);
 
+  // .reduceMotionWarn の表示制御は維持
   const dom = document.querySelector(".reduceMotionWarn");
-  if (obj.enabledMotion) {
-    dom?.setAttribute("hidden", "true");
-  } else {
+  if (!obj.enabledMotion) {
     dom?.removeAttribute("hidden");
+  } else {
+    dom?.setAttribute("hidden", "true");
   }
 };
 
 window.addEventListener("resize", resize);
 mediaQuery.addEventListener("change", resize);
 
+// createSizeObject は enabledMotion を返す
 const createSizeObject = (): {
   width: number;
   type: "resize";
@@ -117,11 +86,9 @@ const createSizeObject = (): {
   enabledMotion: !Boolean(mediaQuery?.matches),
 });
 
+// .offscreenMessage の表示制御
 {
   const dom = document.querySelector(".offscreenMessage");
-  if (enabledOffscreenCanvas) {
-    dom?.removeAttribute("hidden");
-  } else {
-    dom?.setAttribute("hidden", "true");
-  }
+
+  dom?.removeAttribute("hidden");
 }
