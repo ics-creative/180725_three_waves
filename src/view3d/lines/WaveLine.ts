@@ -25,6 +25,8 @@ export class WaveLine extends Object3D {
           0.5,
           0.2 + (k / step) * 0.4,
         ),
+        transparent: true,
+        opacity: 0.2 * (k / step),
       });
       const geometry = new BufferGeometry();
 

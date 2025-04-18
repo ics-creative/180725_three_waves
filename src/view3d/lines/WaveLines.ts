@@ -8,7 +8,7 @@ export class WaveLines extends Group {
     super();
 
     const lines: WaveLine[] = [];
-    const maxLines = 10;
+    const maxLines = 20;
 
     [...Array(maxLines).keys()].forEach((j) => {
       {

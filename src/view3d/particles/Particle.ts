@@ -83,7 +83,7 @@ export class Particle extends Object3D {
     this.vz = (Math.random() - 0.5) * startVz;
     this.life = Math.random() * Math.random() * 400 + 40;
     this.vSize = Math.random() * 0.2;
-    this.baseAlpha = 1.0;
+    this.baseAlpha = 0.1;
     this._destroy = false;
     this._count = 0;
 
@@ -101,27 +101,6 @@ export class Particle extends Object3D {
     // const scaleSpeed = 0.5;
     // 基準の速度係数 (60fps基準)
     const baseSpeedFactor = 60;
-
-    // 削除: デバッグ用のコメントとフレームベース計算を削除
-    /*
-    // ★デバッグのため、時間ベース計算を一時的に元に戻す★
-    // 復活: 日本語コメント
-    // 重力計算
-    this.vy += 0.05;
-
-    // 復活: 日本語コメント
-    // 摩擦計算
-    this.vx *= 0.98;
-    this.vy *= 0.98;
-    this.vz *= 0.98;
-
-    // 復活: 日本語コメント
-    // 位置更新
-    this.x += this.vx;
-    this.y += this.vy;
-    this.z += this.vz;
-    // ★ここまで元に戻す★
-    */
 
     // --- 時間ベースの計算を再適用 ---
     // 重力計算
@@ -149,7 +128,7 @@ export class Particle extends Object3D {
     const maxD: number = 1 - this._count / this.life;
     const sizeNew: number = 1 - (this._count / this.life) * this.vSize;
 
-    this.alpha = Math.random() * 0.3 + this.baseAlpha * maxD;
+    this.alpha = Math.random() * 0.1 + this.baseAlpha * maxD;
     this.scaleValue = sizeNew * MAX_PARTICLE_SIZE;
 
     this._mesh.scale.setLength(this.scaleValue);
