@@ -1,49 +1,51 @@
 <!DOCTYPE html>
 <html lang="ja" dir="ltr">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="google" content="notranslate"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <script defer src="main.js"></script>
-  <style>
-    body {
-      padding: 0;
-      margin: 0;
-      overflow: hidden;
-      background: black;
-      font-family: sans-serif;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="google" content="notranslate"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Three.js Waves</title>
+    <style>
+      body {
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+        background: black;
+        font-family: sans-serif;
+      }
 
-    canvas.myCanvas {
-      width: 100vw !important;
-      height: 100vh !important;
-    }
+      canvas#mainCanvas {
+        display: block;
+        width: 100vw !important;
+        height: 100vh !important;
+      }
 
-    .note {
-      bottom: 8px;
-      right: 8px;
-      position: absolute;
-      display: flex;
-      gap: 4px;
-      flex-direction: column;
-      align-items: flex-end
-    }
+      .note {
+        bottom: 8px;
+        right: 8px;
+        position: absolute;
+        display: flex;
+        gap: 4px;
+        flex-direction: column;
+        align-items: flex-end
+      }
 
-    .offscreenMessage,.reduceMotionWarn {
-      background-color: rgba(0, 0, 0, 0.5);
-      padding: 4px 8px;
-      color: rgba(255, 255, 255, 0.75);
-      font-size: 10px;
-      border-radius: 4px;
-      user-select: none;
-    }
-  </style>
-</head>
-<body>
-  <canvas class="myCanvas"></canvas>
-  <div class="note">
-    <div class="reduceMotionWarn" hidden>OSの設定に応じて、モーションを無効にしています</div>
-    <div class="offscreenMessage" hidden>負荷分散のためオフスクリーンキャンバスで描いています</div>
-  </div>
-</body>
-</html>
+      .offscreenMessage,.reduceMotionWarn {
+        background-color: rgba(0, 0, 0, 0.5);
+        padding: 4px 8px;
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 10px;
+        border-radius: 4px;
+        user-select: none;
+      }
+    </style>
+    <script type="module" crossorigin src="./assets/index-DJXv7uJQ.js"></script>
+  </head>
+  <body>
+    <canvas id="mainCanvas" class="myCanvas"></canvas>
+    <div class="note">
+      <div class="reduceMotionWarn" hidden>OSの設定に応じて、モーションを無効にしています</div>
+      <div class="offscreenMessage" hidden>負荷分散のためオフスクリーンキャンバスで描いています</div>
+    </div>
+  </body>
+</html> 

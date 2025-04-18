@@ -1,8 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  // プロジェクトルートディレクトリ
-  root: '.',
+  base: './',
   // ビルド成果物の出力先ディレクトリ
   build: {
     outDir: 'docs',
