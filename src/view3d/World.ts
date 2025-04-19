@@ -3,6 +3,7 @@ import {
   Fog,
   PerspectiveCamera,
   Scene,
+  SRGBColorSpace,
   Vector3,
 } from "three";
 import { WebGPURenderer } from "three/webgpu";
@@ -11,7 +12,7 @@ import { BigParticleGroup } from "./particles/BigParticleGroup";
 import { DustParticleGroup } from "./objects/DustParticleGroup";
 import { DebugInfo } from "./data/DebugInfo";
 
-import { Earth } from "./objects/Earth";
+import { Earth, LENGTH } from "./objects/Earth";
 import { WaveLines } from "./lines/WaveLines";
 import { BackGround } from "./objects/BackGround";
 import { TextureManager } from "./TextureManager";
@@ -73,7 +74,7 @@ export class World {
       // シーンを作成
       const scene = new Scene();
       this.scene = scene;
-      scene.fog = new Fog(0x000000, 50, 3500);
+      scene.fog = new Fog(0x000000, 200, 4000);
 
       // カメラを作成
       // FOV:90 = 35mmLens: 18mm
@@ -111,6 +112,7 @@ export class World {
       antialias: false,
       canvas: this._canvas as HTMLCanvasElement,
     });
+    this.renderer.outputColorSpace = SRGBColorSpace;
     await this.renderer.init();
 
     // ------------------------------------
@@ -123,6 +125,7 @@ export class World {
         // 地面を作成
         const mesh = new Earth();
         mesh.position.y = -200;
+        mesh.position.z = -LENGTH + 500;
         mesh.rotateX(-Math.PI / 2);
         mesh.rotateZ(Math.PI / 3);
         this.scene.add(mesh);
@@ -189,8 +192,9 @@ export class World {
     let needsAnimationRender = false;
     if (this._reducedMotionPreferred === true) {
       // カメラ移動
-      this.camera.position.x = Math.cos(Date.now() / 3000) * 50;
+      this.camera.position.x = Math.cos(Date.now() / 5000) * 500;
       this.camera.position.y = Math.sin(Date.now() / 5000) * 100 + 50;
+      // this.camera.position.z = 0;
       this.camera.lookAt(new Vector3(0, 0, 0));
       needsAnimationRender = true;
 
@@ -202,7 +206,7 @@ export class World {
         this._objects.earth &&
         this._objects.waveLines
       ) {
-        if (this._debugInfo.bg) this._objects.earth.update(deltaTime);
+        if (this._debugInfo.earth) this._objects.earth.update(deltaTime);
         if (this._debugInfo.waves) this._objects.waveLines.update(deltaTime);
         if (this._debugInfo.particlesDust)
           this._objects.dustParticleGroup.update(deltaTime);

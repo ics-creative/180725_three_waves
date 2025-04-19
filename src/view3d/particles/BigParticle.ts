@@ -82,7 +82,7 @@ export class BigParticle extends Object3D {
     this.vz = (Math.random() - 0.5) * startVz;
     this.life = Math.random() * Math.random() * 400 + 40;
     this.vSize = Math.random() * 0.2;
-    this.baseAlpha = 1.0;
+    this.baseAlpha = 0.3;
     this._destroy = false;
     this._count = 0;
 
@@ -124,7 +124,7 @@ export class BigParticle extends Object3D {
     const maxD: number = 1 - this._count / this.life;
     const sizeNew: number = 1 - (this._count / this.life) * this.vSize;
 
-    this.alpha = Math.random() * 0.3 + this.baseAlpha * maxD;
+    this.alpha = Math.random() * 0.1 + this.baseAlpha * maxD;
     this.scaleValue = sizeNew * MAX_PARTICLE_SIZE;
 
     this._mesh.scale.setLength(this.scaleValue);

@@ -18,21 +18,19 @@ export class BigParticleGroup extends Group {
    */
   public update(deltaTime: number): void {
     this._count++;
-    if (this._count % 1 === 0) {
-      // 手前ほどパーティックルの発生位置を狭める
-      const far = { x: 5000, z: -3500 };
-      const near = { x: 500, z: 1000 };
+    // 手前ほどパーティックルの発生位置を狭める
+    const far = { x: 5000, z: -5000 };
+    const near = { x: 500, z: 1000 };
 
-      const distance = (near.z - far.z) * Math.random() + far.z;
-      const range = (near.z - distance) / (near.z - far.z);
-      const wide = (far.x - near.x) * range + near.x;
+    const distance = (near.z - far.z) * Math.random() + far.z;
+    const range = (near.z - distance) / (near.z - far.z);
+    const wide = (far.x - near.x) * range + near.x;
 
-      this._emitter.emit(
-        wide * (Math.random() - 0.5),
-        200 * (Math.random() - 0.5) + -100,
-        distance,
-      );
-    }
+    this._emitter.emit(
+      wide * (Math.random() - 0.5),
+      200 * (Math.random() - 0.5) + -100,
+      distance,
+    );
 
     this._emitter.updateParticles(deltaTime);
   }

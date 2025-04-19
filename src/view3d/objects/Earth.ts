@@ -10,7 +10,7 @@ import { SimplexNoise } from "three/examples/jsm/math/SimplexNoise.js";
 
 // 変更: 解像度を上げる (75 -> 150)
 const SEGMENT = 150;
-const LENGTH = 4000;
+export const LENGTH = 2000;
 
 const noise = new SimplexNoise();
 
@@ -27,7 +27,7 @@ export class Earth extends Mesh {
       SEGMENT,
     );
     const material = new MeshPhongMaterial({
-      color: new Color().setHSL(0.7, 0.5, 0.5),
+      color: new Color().setHSL(0.7, 0.7, 0.5),
       blending: AdditiveBlending,
       wireframe: true,
     });
@@ -50,7 +50,7 @@ export class Earth extends Mesh {
 
       // 変更: 累積時間と係数を使って time を計算
       const time = this._elapsedTime * timeFactor;
-      const nextZ = noise.noise3d(col / 40, row / 40, time) * 200;
+      const nextZ = noise.noise3d(col / 60, row / 60, time) * 200;
 
       attributesPosition.setZ(i, nextZ);
     }

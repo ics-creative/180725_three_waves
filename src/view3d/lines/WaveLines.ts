@@ -8,14 +8,15 @@ export class WaveLines extends Group {
     super();
 
     const lines: WaveLine[] = [];
-    const maxLines = 20;
+    const maxLines = 10;
 
     [...Array(maxLines).keys()].forEach((j) => {
       {
         const line = new WaveLine(
           j,
           maxLines,
-          Math.max(1, Math.round(j ** 3 / 60)),
+          100,
+          //Math.max(1, Math.round(j ** 3 / 60)),
         );
         this.add(line);
         lines.push(line);

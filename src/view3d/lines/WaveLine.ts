@@ -1,4 +1,5 @@
 import {
+  AdditiveBlending,
   BufferAttribute,
   BufferGeometry,
   Color,
@@ -13,30 +14,36 @@ const noise = new SimplexNoise();
 
 export class WaveLine extends Object3D {
   private lines: Line[];
-  constructor(j: number, maxLines: number, step: number) {
+  constructor(countZ: number, maxLines: number, step: number) {
     super();
 
     this.lines = [];
 
-    [...Array(step).keys()].forEach((k) => {
+    [...Array(step).keys()].forEach((countY) => {
       const material = new LineBasicMaterial({
         color: new Color().setHSL(
-          0.6 + (j / maxLines) * 0.2,
+          0.6 + (countZ / maxLines) * 0.2,
           0.5,
-          0.2 + (k / step) * 0.4,
+          0.2 + (countY / step) * 0.4,
         ),
         transparent: true,
-        opacity: 0.2 * (k / step),
+        opacity: 0.2 * (countY / step) * (countZ / maxLines),
+        blendAlpha: AdditiveBlending,
       });
       const geometry = new BufferGeometry();
 
       const points: Vector3[] = [];
 
-      const max = 200;
+      const max = 100;
+      const lineWidth = 25;
 
-      [...Array(max).keys()].forEach((i) => {
+      [...Array(max).keys()].forEach((countX) => {
         points.push(
-          new Vector3((max / 2 - i) * 10, 0, (j - maxLines / 2) * 100 + 500),
+          new Vector3(
+            (max / 2 - countX) * lineWidth,
+            0,
+            (countZ - maxLines / 2) * 100 + 0,
+          ),
         );
       });
       geometry.setFromPoints(points);
@@ -48,21 +55,14 @@ export class WaveLine extends Object3D {
   }
 
   public update(deltaTime: number, j: number): void {
-    // 基準の速度係数 (60fps基準)
-    const baseSpeedFactor = 60;
-    // 時間のスケールを調整する係数 (元の / 10000 を基準に調整)
-    const timeScale = 100; // この値を調整して速度を変更
-
     this.lines.forEach((line, k) => {
       const geometry = line.geometry;
       const attributesPosition = geometry.attributes
         .position as BufferAttribute;
 
       for (let i = 0; i < attributesPosition.count; i++) {
-        // 変更: ノイズ関数の時間入力部分を deltaTime ベースに調整
-        const time =
-          (deltaTime * baseSpeedFactor * timeScale + k * 50) / 10000 + j * 300;
-        const nextY = noise.noise3d(i / 100, time, 0) * 200;
+        const time = (Date.now() + k * 50) / 5000 + j * 300;
+        const nextY = noise.noise3d(i / 100, time, 0) * 250;
 
         attributesPosition.setY(i, nextY);
       }
