@@ -1,8 +1,8 @@
 export type DebugInfo = {
   bg: boolean;
   earth: boolean;
-  particles: boolean;
-  clouds: boolean;
+  particlesBig: boolean;
+  particlesDust: boolean;
   waves: boolean;
   title: boolean;
 };

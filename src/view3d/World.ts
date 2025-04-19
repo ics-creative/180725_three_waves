@@ -204,9 +204,9 @@ export class World {
       ) {
         if (this._debugInfo.bg) this._objects.earth.update(deltaTime);
         if (this._debugInfo.waves) this._objects.waveLines.update(deltaTime);
-        if (this._debugInfo.clouds)
+        if (this._debugInfo.particlesDust)
           this._objects.dustParticleGroup.update(deltaTime);
-        if (this._debugInfo.particles)
+        if (this._debugInfo.particlesBig)
           this._objects.bigParticleGroup.update(deltaTime);
         this._objects.bg.lookAt(this.camera.position);
         needsAnimationRender = true;
@@ -214,8 +214,9 @@ export class World {
         // 表示有無更新
         if (this._debugInfo) {
           this._objects.bg.visible = this._debugInfo.bg;
-          this._objects.bigParticleGroup.visible = this._debugInfo.particles;
-          this._objects.dustParticleGroup.visible = this._debugInfo.clouds;
+          this._objects.bigParticleGroup.visible = this._debugInfo.particlesBig;
+          this._objects.dustParticleGroup.visible =
+            this._debugInfo.particlesDust;
           this._objects.earth.visible = this._debugInfo.earth;
           this._objects.waveLines.visible = this._debugInfo.waves;
         }
@@ -264,5 +265,18 @@ export class World {
     const sx = width / height;
     const sy = 1.0;
     this._objects.bg?.scale.set(sx, sy, 1.0);
+  }
+
+  /**
+   * デバッグ情報を更新します。
+   * メインスレッドの dat.gui からの変更を反映するために使用されます。
+   * @param newInfo 更新された DebugInfo オブジェクト
+   */
+  public updateDebugInfo(newInfo: DebugInfo): void {
+    // Note: オブジェクト全体を置き換えるか、プロパティごとにコピーするかは設計次第。
+    //       今回はシンプルに全体を置き換える。
+    Object.assign(this._debugInfo, newInfo);
+    // 更新後、すぐに表示に反映させるためにレンダリングを要求する
+    this._needRender = true;
   }
 }

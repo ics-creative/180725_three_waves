@@ -1,6 +1,6 @@
 import { Group } from "three";
 import { Emitter } from "./Emitter";
-import { Particle } from "./Particle";
+import { BigParticle } from "./BigParticle";
 
 /**
  * パーティクルエミッター
@@ -8,8 +8,8 @@ import { Particle } from "./Particle";
 export class ParticleEmitter extends Emitter {
   public container: Group;
   private PRE_CACHE_PARTICLES = 100;
-  private _particleActive: Particle[];
-  private _particlePool: Particle[];
+  private _particleActive: BigParticle[];
+  private _particlePool: BigParticle[];
 
   /**
    * @param numParticles 1フレーム間に発生させる Particle 数
@@ -32,7 +32,7 @@ export class ParticleEmitter extends Emitter {
 
     /* 予め必要そうな分だけ作成しておく */
     for (let i = 0; i < this.PRE_CACHE_PARTICLES; i++) {
-      this._particlePool.push(new Particle());
+      this._particlePool.push(new BigParticle());
     }
   }
 
@@ -50,7 +50,7 @@ export class ParticleEmitter extends Emitter {
 
   /**
    * パーティクルを更新します。
-   * @param {number} deltaTime 前フレームからの経過時間（秒）
+   * @param deltaTime 前フレームからの経過時間（秒）
    */
   public updateParticles(deltaTime: number) {
     this._particleActive.forEach((p) => {
@@ -85,9 +85,9 @@ export class ParticleEmitter extends Emitter {
 
   /**
    * パーティクルを削除します。
-   * @param {Particle} particle
+   * @param particle
    */
-  public removeParticle(particle: Particle): void {
+  public removeParticle(particle: BigParticle): void {
     this.container.remove(particle);
 
     const index = this._particleActive.indexOf(particle);
@@ -100,28 +100,28 @@ export class ParticleEmitter extends Emitter {
 
   /**
    * アクティブなパーティクルを取り出します。
-   * @returns {Particle[]}
+   * @returns {BigParticle[]}
    */
-  public getActiveParticles(): Particle[] {
+  public getActiveParticles(): BigParticle[] {
     return this._particleActive;
   }
 
   /**
    * プールからインスタンスを取り出します。
    * プールになければ新しいインスタンスを作成します。
-   * @returns {Particle}
+   * @returns {BigParticle}
    */
-  private fromPool(): Particle {
+  private fromPool(): BigParticle {
     return this._particlePool.length > 0
-      ? (this._particlePool.shift() as Particle)
-      : new Particle();
+      ? (this._particlePool.shift() as BigParticle)
+      : new BigParticle();
   }
 
   /**
    * プールにインスタンスを格納します。
    * @param particle
    */
-  private toPool(particle: Particle): void {
+  private toPool(particle: BigParticle): void {
     this._particlePool.push(particle);
   }
 }

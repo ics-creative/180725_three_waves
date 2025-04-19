@@ -5,7 +5,7 @@ let worker: Worker;
 
 const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-const USE_DEBUG = false;
+const USE_DEBUG = true;
 
 // ------------------------------------
 // デバッグのための情報を定義
@@ -14,19 +14,25 @@ const USE_DEBUG = false;
 const visibleInfo: DebugInfo = {
   bg: true,
   earth: true,
-  particles: true,
-  clouds: true,
+  particlesBig: true,
+  particlesDust: true,
   waves: true,
   title: true,
 };
 if (USE_DEBUG) {
   // GUIパラメータの準備
   const gui = new dat.GUI();
-  gui.add(visibleInfo, "bg");
-  gui.add(visibleInfo, "earth");
-  gui.add(visibleInfo, "particles");
-  gui.add(visibleInfo, "clouds");
-  gui.add(visibleInfo, "waves");
+
+  // 変更: ループを使ってコントローラーとリスナーを追加
+  Object.keys(visibleInfo).forEach((key) => {
+    gui.add(visibleInfo, key as keyof DebugInfo).onChange(() => {
+      worker?.postMessage({
+        type: "updateVisibleInfo",
+        visibleInfo: visibleInfo,
+      });
+    });
+  });
+
   gui.closed = true; // 閉じておく
 }
 

@@ -9,11 +9,20 @@ onmessage = (event) => {
     case "resize":
       resize(event.data);
       break;
+    case "updateVisibleInfo":
+      if (world) {
+        world.updateDebugInfo(event.data.visibleInfo);
+      }
+      break;
   }
 };
 
 let world: World;
-const init = (data: { canvas: OffscreenCanvas; visibleInfo: DebugInfo, enabledMotion: boolean }) => {
+const init = (data: {
+  canvas: OffscreenCanvas;
+  visibleInfo: DebugInfo;
+  enabledMotion: boolean;
+}) => {
   // コンテンツを再生します。
   world = new World(data);
 };

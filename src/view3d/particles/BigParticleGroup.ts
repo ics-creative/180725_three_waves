@@ -14,7 +14,7 @@ export class BigParticleGroup extends Group {
 
   /**
    * エンターフレームイベント
-   * @param {number} deltaTime 前フレームからの経過時間（秒）
+   * @param deltaTime 前フレームからの経過時間（秒）
    */
   public update(deltaTime: number): void {
     this._count++;

@@ -12,7 +12,7 @@ const MAX_PARTICLE_SIZE = 100;
 /**
  * 粒子クラスです。
  */
-export class Particle extends Object3D {
+export class BigParticle extends Object3D {
   public x = 0;
   public y = 0;
   public z = 0;
@@ -32,7 +32,6 @@ export class Particle extends Object3D {
 
   /**
    * コンストラクタ
-   * @constructor
    */
   constructor() {
     super();
@@ -46,13 +45,13 @@ export class Particle extends Object3D {
     const material = new SpriteMaterial({
       color: new Color().setHSL(
         0.5 + Math.random() * 0.3,
-        0.1,
-        0.5 + Math.random() * 0.5,
+        0.7 + Math.random() * 0.2,
+        0.6 + Math.random() * 0.2,
       ),
       map: list[Math.floor(list.length * Math.random())],
       blending: AdditiveBlending,
-      depthTest: true,
-      depthWrite: true,
+      depthTest: false,
+      depthWrite: false,
       transparent: true,
       fog: true,
     });
@@ -83,7 +82,7 @@ export class Particle extends Object3D {
     this.vz = (Math.random() - 0.5) * startVz;
     this.life = Math.random() * Math.random() * 400 + 40;
     this.vSize = Math.random() * 0.2;
-    this.baseAlpha = 0.1;
+    this.baseAlpha = 1.0;
     this._destroy = false;
     this._count = 0;
 
@@ -93,12 +92,9 @@ export class Particle extends Object3D {
 
   /**
    * パーティクル個別の内部計算を行います。
-   * @method
-   * @param {number} deltaTime 前フレームからの経過時間（秒）
+   * @param deltaTime 前フレームからの経過時間（秒）
    */
   public update(deltaTime: number): void {
-    // スケールアニメーション速度 (任意の値)
-    // const scaleSpeed = 0.5;
     // 基準の速度係数 (60fps基準)
     const baseSpeedFactor = 60;
 
@@ -128,7 +124,7 @@ export class Particle extends Object3D {
     const maxD: number = 1 - this._count / this.life;
     const sizeNew: number = 1 - (this._count / this.life) * this.vSize;
 
-    this.alpha = Math.random() * 0.1 + this.baseAlpha * maxD;
+    this.alpha = Math.random() * 0.3 + this.baseAlpha * maxD;
     this.scaleValue = sizeNew * MAX_PARTICLE_SIZE;
 
     this._mesh.scale.setLength(this.scaleValue);
@@ -143,8 +139,6 @@ export class Particle extends Object3D {
 
   /**
    * パーティクルが死んでいるかどうかを確認します。
-   * @returns {boolean}
-   * @method
    */
   public getIsDead(): boolean {
     return this._destroy;
