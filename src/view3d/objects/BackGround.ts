@@ -1,17 +1,13 @@
-import {
-  AdditiveBlending,
-  Group,
-  Mesh,
-  MeshBasicMaterial,
-  PlaneGeometry,
-} from "three";
+import { AdditiveBlending, Group, Mesh, MeshBasicMaterial, PlaneGeometry } from "three";
 import { toTexture } from "../utils/ThreeAssetUtil";
 import * as ImageBg from "../../assets/bg.png";
 
 export class BackGround extends Group {
+  public readonly ready: Promise<void>;
+
   constructor() {
     super();
-    this.init();
+    this.ready = this.init();
   }
 
   async init() {

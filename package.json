@@ -2,21 +2,21 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "format": "prettier --write 'src/**/*.ts'"
+    "format": "oxfmt --write 'src/**/*.ts'"
   },
   "repository": "https://ics-ikeda@github.com/ics-creative/180725_three_waves.git",
   "author": "ics-ikeda <ikeda@ics-web.jp>",
   "license": "SEE LICENSE IN LICENSE",
   "private": true,
+  "type": "module",
   "dependencies": {
-    "dat.gui": "^0.7.9",
-    "three": "^0.175.0"
+    "three": "^0.186.0"
   },
   "devDependencies": {
-    "@types/dat.gui": "^0.7.13",
-    "@types/three": "^0.175.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.3",
-    "vite": "^6.3.2"
+    "@types/node": "^24.13.6",
+    "@types/three": "^0.186.0",
+    "oxfmt": "^0.70.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.0"
   }
 }

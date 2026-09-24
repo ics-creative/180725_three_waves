@@ -1,10 +1,4 @@
-import {
-  AdditiveBlending,
-  Color,
-  Object3D,
-  Sprite,
-  SpriteMaterial,
-} from "three";
+import { AdditiveBlending, Color, Object3D, Sprite, SpriteMaterial } from "three";
 import { TextureManager } from "../TextureManager";
 
 const MAX_PARTICLE_SIZE = 100;
@@ -26,6 +20,7 @@ export class BigParticle extends Object3D {
   public baseAlpha = 0;
 
   private _count = 0;
+  private _flicker = 0;
   private _destroy: boolean;
 
   private _mesh: Sprite;
@@ -85,6 +80,7 @@ export class BigParticle extends Object3D {
     this.baseAlpha = 0.3;
     this._destroy = false;
     this._count = 0;
+    this._flicker = 0;
 
     this.alpha = 1.0;
     this.scaleValue = 1.0;
@@ -95,45 +91,41 @@ export class BigParticle extends Object3D {
    * @param deltaTime 前フレームからの経過時間（秒）
    */
   public update(deltaTime: number): void {
-    // 基準の速度係数 (60fps基準)
-    const baseSpeedFactor = 60;
-
-    // --- 時間ベースの計算を再適用 ---
-    // 重力計算
-    const gravity = 0.05 * baseSpeedFactor;
-    this.vy += gravity * deltaTime;
-
-    // 摩擦計算 (指数関数的減衰に変更)
-    const frictionFactor = Math.pow(0.98, deltaTime * baseSpeedFactor);
-    this.vx *= frictionFactor;
-    this.vy *= frictionFactor;
-    this.vz *= frictionFactor;
-
-    // 位置更新
-    this.x += this.vx * deltaTime * baseSpeedFactor;
-    this.y += this.vy * deltaTime * baseSpeedFactor;
-    this.z += this.vz * deltaTime * baseSpeedFactor;
-    // --- ここまで時間ベース計算 ---
+    const frameDelta = deltaTime * 60;
+    // 60fpsの摩擦・重力を時間幅に合わせて積分し、120fpsでも同じ軌道を保つ。
+    const friction = 0.98;
+    const decay = Math.pow(friction, frameDelta);
+    const distanceFactor = (friction * (1 - decay)) / (1 - friction);
+    const terminalVelocity = (0.05 * friction) / (1 - friction);
+    this.x += this.vx * distanceFactor;
+    this.y += terminalVelocity * frameDelta + (this.vy - terminalVelocity) * distanceFactor;
+    this.z += this.vz * distanceFactor;
+    this.vx *= decay;
+    this.vy = terminalVelocity + (this.vy - terminalVelocity) * decay;
+    this.vz *= decay;
 
     this.position.set(this.x, this.y, this.z);
 
-    // 経過時間を加算
-    this._count++;
+    const previousFrame = Math.floor(this._count + 1e-9);
+    this._count += frameDelta;
+    // 明滅の乱数も60Hzで更新する。
+    for (let i = previousFrame; i < Math.floor(this._count + 1e-9); i++) {
+      this._flicker = Math.random() * 0.1;
+    }
 
-    // 徐々に小さく、アルファを0に近づける (ここはフレームベースのまま)
+    // 寿命・縮小・フェードも経過時間に比例させる。
     const maxD: number = 1 - this._count / this.life;
     const sizeNew: number = 1 - (this._count / this.life) * this.vSize;
 
-    this.alpha = Math.random() * 0.1 + this.baseAlpha * maxD;
+    this.alpha = this._flicker + this.baseAlpha * maxD;
     this.scaleValue = sizeNew * MAX_PARTICLE_SIZE;
 
     this._mesh.scale.setLength(this.scaleValue);
     (this._mesh.material as SpriteMaterial).opacity = this.alpha;
 
-    // 死亡フラグ (フレームベースのまま)
-    if (this.life < this._count) {
+    // 回収はEmitterがまとめて行う。
+    if (this._count + 1e-9 >= this.life) {
       this._destroy = true;
-      (this.parent as Object3D)?.remove(this);
     }
   }
 

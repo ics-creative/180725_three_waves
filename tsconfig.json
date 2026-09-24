@@ -2,14 +2,12 @@
   "compilerOptions": {
     "sourceMap": true,
     "strict": true,
-    // TSはECMAScript 5に変換
+    // JavaScriptへの変換はViteに任せる
     "target": "ESNext",
     // TSのモジュールはES Modulesとして出力
     "module": "ESNext",
     // node_modules からライブラリを読み込む
     "moduleResolution": "bundler",
-    // Provide full support for iterables in 'for-of', spread, and destructuring when targeting 'ES5' or 'ES3'
-    "downlevelIteration": true,
     // 追加: デフォルトインポートを許可
     "allowSyntheticDefaultImports": true,
     "lib": [

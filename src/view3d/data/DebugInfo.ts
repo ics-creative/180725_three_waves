@@ -4,5 +4,4 @@ export type DebugInfo = {
   particlesBig: boolean;
   particlesDust: boolean;
   waves: boolean;
-  title: boolean;
 };

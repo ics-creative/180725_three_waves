@@ -1,11 +1,4 @@
-import {
-  AdditiveBlending,
-  BufferAttribute,
-  Color,
-  Mesh,
-  MeshPhongMaterial,
-  PlaneGeometry,
-} from "three";
+import { BufferAttribute, Color, Mesh, MeshPhongMaterial, PlaneGeometry } from "three";
 import { SimplexNoise } from "three/examples/jsm/math/SimplexNoise.js";
 
 // 変更: 解像度を上げる (75 -> 150)
@@ -20,15 +13,9 @@ export class Earth extends Mesh {
 
   constructor() {
     // 箱を作成
-    const geometry = new PlaneGeometry(
-      LENGTH * 2,
-      LENGTH * 2,
-      SEGMENT,
-      SEGMENT,
-    );
+    const geometry = new PlaneGeometry(LENGTH * 2, LENGTH * 2, SEGMENT, SEGMENT);
     const material = new MeshPhongMaterial({
       color: new Color().setHSL(0.7, 0.7, 0.5),
-      blending: AdditiveBlending,
       wireframe: true,
     });
     super(geometry, material);

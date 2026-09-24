@@ -4,6 +4,5 @@ node_modules
 .DS_Store
 Thumbs.db
 yarn.lock
-package-lock.json
-/docs/main.js.map
+/dist/
 /yarn-error.log

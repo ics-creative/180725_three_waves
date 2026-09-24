@@ -42,9 +42,9 @@ export class ParticleEmitter extends Emitter {
    * @param y パーティクルの発生Y座標
    * @param z パーティクルの発生Z座標
    */
-  public emit(x: number, y: number, z: number) {
+  public emit(x: number, y: number, z: number, age = 0) {
     for (let i = 0; i < this.numParticles; i++) {
-      this.getNewParticle(x, y, z);
+      this.getNewParticle(x, y, z).update(age);
     }
   }
 
@@ -53,13 +53,18 @@ export class ParticleEmitter extends Emitter {
    * @param deltaTime 前フレームからの経過時間（秒）
    */
   public updateParticles(deltaTime: number) {
-    this._particleActive.forEach((p) => {
-      if (!p.getIsDead()) {
-        p.update(deltaTime);
+    let aliveCount = 0;
+    for (const particle of this._particleActive) {
+      if (!particle.getIsDead()) particle.update(deltaTime);
+      if (particle.getIsDead()) {
+        this.container.remove(particle);
+        this.toPool(particle);
       } else {
-        this.removeParticle(p);
+        this._particleActive[aliveCount++] = particle;
       }
-    });
+    }
+    // spliceで走査中の要素を飛ばさず、順序を保って生存粒子を詰める。
+    this._particleActive.length = aliveCount;
   }
 
   /**
@@ -70,14 +75,7 @@ export class ParticleEmitter extends Emitter {
    */
   private getNewParticle(emitX: number, emitY: number, emitZ: number) {
     const particle = this.fromPool();
-    particle.resetParameters(
-      emitX,
-      emitY,
-      emitZ,
-      this.startVx,
-      this.startVy,
-      this.startVz,
-    );
+    particle.resetParameters(emitX, emitY, emitZ, this.startVx, this.startVy, this.startVz);
     this._particleActive.push(particle);
     this.container.add(particle);
     return particle;
@@ -113,7 +111,7 @@ export class ParticleEmitter extends Emitter {
    */
   private fromPool(): BigParticle {
     return this._particlePool.length > 0
-      ? (this._particlePool.shift() as BigParticle)
+      ? (this._particlePool.pop() as BigParticle)
       : new BigParticle();
   }
 

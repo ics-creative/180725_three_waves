@@ -1,11 +1,24 @@
-import * as dat from "dat.gui";
+import { World } from "./view3d/World";
 import { DebugInfo } from "./view3d/data/DebugInfo";
 
-let worker: Worker;
+let world: World | undefined;
+let playRequested = true;
+
+export interface ThreeWavesControls {
+  /** レンダラーと画像の初期化完了。失敗時はrejectする。 */
+  readonly ready: Promise<void>;
+  readonly isPlaying: boolean;
+  play(): void;
+  pause(): void;
+}
+
+declare global {
+  interface Window {
+    threeWaves: ThreeWavesControls;
+  }
+}
 
 const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-
-const USE_DEBUG = true;
 
 // ------------------------------------
 // デバッグのための情報を定義
@@ -17,53 +30,38 @@ const visibleInfo: DebugInfo = {
   particlesBig: true,
   particlesDust: true,
   waves: true,
-  title: true,
 };
-if (USE_DEBUG) {
-  // GUIパラメータの準備
-  const gui = new dat.GUI();
 
-  // 変更: ループを使ってコントローラーとリスナーを追加
-  Object.keys(visibleInfo).forEach((key) => {
-    gui.add(visibleInfo, key as keyof DebugInfo).onChange(() => {
-      worker?.postMessage({
-        type: "updateVisibleInfo",
-        visibleInfo: visibleInfo,
-      });
+// 後からスクリプトを読み込む組み込み先でも初期化する。
+async function init(): Promise<void> {
+  if (document.readyState === "loading") {
+    await new Promise<void>((resolve) => {
+      document.addEventListener("DOMContentLoaded", () => resolve(), { once: true });
     });
-  });
+  }
 
-  gui.closed = true; // 閉じておく
-}
-
-// DOM構築後に実行開始
-window.addEventListener("DOMContentLoaded", async () => {
-  const canvas = document.querySelector("#mainCanvas") as HTMLCanvasElement;
+  const canvas = document.querySelector<HTMLCanvasElement>("#mainCanvas");
+  if (!canvas) throw new Error("Three.js Waves: #mainCanvas が見つかりません。");
 
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
-  // Workerを作成し、OffscreenCanvasを渡す
-  worker = new Worker(new URL("./worker.ts", import.meta.url), {
-    type: "module",
+  world = new World({
+    canvas,
+    visibleInfo,
+    enabledMotion: !mediaQuery.matches,
+    autoPlay: playRequested,
+    inspectorEnabled: new URLSearchParams(location.search).get("inspector") !== "false",
   });
 
-  const offscreenCanvas = canvas.transferControlToOffscreen();
-  worker.postMessage(
-    {
-      type: "init",
-      canvas: offscreenCanvas,
-      visibleInfo,
-    },
-    [offscreenCanvas],
-  );
-
   resize(); // 初回リサイズ呼び出し
-});
+  await world.ready;
+  window.dispatchEvent(new Event("three-waves-ready"));
+}
 
 const resize = () => {
   const obj = createSizeObject();
-  worker.postMessage(obj);
+  world?.resize(obj);
 
   // .reduceMotionWarn の表示制御は維持
   const dom = document.querySelector(".reduceMotionWarn");
@@ -80,21 +78,44 @@ mediaQuery.addEventListener("change", resize);
 // createSizeObject は enabledMotion を返す
 const createSizeObject = (): {
   width: number;
-  type: "resize";
   devicePixelRatio: number;
   height: number;
   enabledMotion: boolean;
 } => ({
-  type: "resize",
   width: innerWidth,
   height: innerHeight,
   devicePixelRatio: devicePixelRatio,
   enabledMotion: !Boolean(mediaQuery?.matches),
 });
 
-// .offscreenMessage の表示制御
-{
-  const dom = document.querySelector(".offscreenMessage");
+window.threeWaves = Object.freeze({
+  ready: init(),
+  get isPlaying() {
+    return world?.isPlaying ?? false;
+  },
+  play() {
+    playRequested = true;
+    world?.play();
+  },
+  pause() {
+    playRequested = false;
+    world?.pause();
+  },
+});
 
-  dom?.removeAttribute("hidden");
-}
+// 別オリジンのiframeとして組み込む場合の制御窓口。
+const parentOrigins = new Set([location.origin, "https://ics-web.jp", "https://www.ics-web.jp"]);
+window.addEventListener("message", (event: MessageEvent<unknown>) => {
+  if (event.source !== window.parent || !parentOrigins.has(event.origin)) return;
+  const data = event.data;
+  if (
+    typeof data !== "object" ||
+    data === null ||
+    !("type" in data) ||
+    data.type !== "three-waves" ||
+    !("action" in data)
+  )
+    return;
+  if (data.action === "pause") window.threeWaves.pause();
+  if (data.action === "play") window.threeWaves.play();
+});
