@@ -21,8 +21,24 @@ const noise = new SimplexNoise();
 const DEPTH_COUNT = 10;
 const LINES_PER_DEPTH = 100;
 const POINT_COUNT = 100;
+const CENTER_POINT_COUNT = 60;
+const POINT_SPACING = 25;
+const EDGE_POINT_COUNT = (POINT_COUNT - CENTER_POINT_COUNT) / 2;
+const EDGE_GROWTH = 1.2;
+const NOISE_LENGTH = 2500;
 const LINE_COUNT = DEPTH_COUNT * LINES_PER_DEPTH;
 const INDEX_COUNT_PER_LINE = (POINT_COUNT - 1) * 2;
+
+// 100点のうち中央60点は元の密度を保ち、左右20点ずつで有限の表示幅を確保する。
+const xCoordinates = Float32Array.from({ length: POINT_COUNT }, (_, i) => {
+  const point = i - EDGE_POINT_COUNT;
+  const basePoint = Math.max(0, Math.min(CENTER_POINT_COUNT - 1, point));
+  const distance = point - basePoint;
+  const extension = (POINT_SPACING * (EDGE_GROWTH ** Math.abs(distance) - 1)) / (EDGE_GROWTH - 1);
+  return (CENTER_POINT_COUNT / 2 - basePoint) * POINT_SPACING - Math.sign(distance) * extension;
+});
+// 頂点を配置し直しても、波の位置と波長を変えない。
+const noiseCoordinates = Float64Array.from(xCoordinates, (x) => 0.5 - x / NOISE_LENGTH);
 
 /** 透明オブジェクトの描画順を保ちながら、連続する波線をまとめて描画する。 */
 export class WaveLines extends Group {
@@ -52,7 +68,7 @@ export class WaveLines extends Group {
         const alpha = 0.2 * (k / LINES_PER_DEPTH) * (j / DEPTH_COUNT);
         for (let i = 0; i < POINT_COUNT; i++) {
           const vertex = (j * LINES_PER_DEPTH + k) * POINT_COUNT + i;
-          positions[vertex * 3] = (POINT_COUNT / 2 - i) * 25;
+          positions[vertex * 3] = xCoordinates[i];
           positions[vertex * 3 + 2] = (j - DEPTH_COUNT / 2) * 100;
           colors[vertex * 4] = color.r;
           colors[vertex * 4 + 1] = color.g;
@@ -131,7 +147,7 @@ export class WaveLines extends Group {
       geometry.setAttribute("position", this.positions);
       geometry.setAttribute("color", this.colors);
       geometry.setIndex(this.indices);
-      geometry.boundingSphere = new Sphere(new Vector3(), Math.hypot(1250, 500, 1000));
+      geometry.boundingSphere = new Sphere(new Vector3(), Math.hypot(xCoordinates[0], 500, 1000));
       batch = new LineSegments(geometry, this.material);
       batch.matrixAutoUpdate = false;
       batch.frustumCulled = false;
@@ -155,7 +171,7 @@ export class WaveLines extends Group {
       for (let k = 0; k < LINES_PER_DEPTH; k++) {
         const time = (animationTime + k * 50) / 5000 + j * 300;
         for (let i = 0; i < POINT_COUNT; i++, offset += 3) {
-          positions[offset] = noise.noise3d(i / 100, time, 0) * 250;
+          positions[offset] = noise.noise3d(noiseCoordinates[i], time, 0) * 250;
         }
       }
     }
@@ -168,7 +184,8 @@ export class WaveLines extends Group {
       let minY = Infinity;
       let maxY = -Infinity;
       const offset = line * POINT_COUNT * 3;
-      for (let i = 0; i < POINT_COUNT; i++) {
+      // 外側の疎な頂点に影響されないよう、中央部分からソート用の中心を求める。
+      for (let i = EDGE_POINT_COUNT; i < EDGE_POINT_COUNT + CENTER_POINT_COUNT; i++) {
         const y = positions[offset + i * 3 + 1];
         minY = Math.min(minY, y);
         maxY = Math.max(maxY, y);

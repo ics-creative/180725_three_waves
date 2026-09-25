@@ -11,6 +11,9 @@ import { WaveLines } from "./lines/WaveLines";
 import { BackGround } from "./objects/BackGround";
 import { TextureManager } from "./TextureManager";
 
+// 波線の有限の幅に合わせ、4:1を超える横長画面だけ画角を絞る。
+const MAX_VIEW_ASPECT = 4;
+
 /**
  * 空間の登場人物を管理するためのインターフェースです。
  */
@@ -302,6 +305,7 @@ export class World {
 
     // カメラのアスペクト比を正す
     this.camera.aspect = width / height;
+    this.camera.zoom = Math.max(1, this.camera.aspect / MAX_VIEW_ASPECT);
     this.camera.updateProjectionMatrix();
 
     // 背景の縦横比を調整
