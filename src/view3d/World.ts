@@ -1,6 +1,5 @@
 import { DirectionalLight, Fog, PerspectiveCamera, Scene, SRGBColorSpace, Vector3 } from "three";
-import { WebGPURenderer } from "three/webgpu";
-import { Inspector } from "three/addons/inspector/Inspector.js";
+import { Renderer, StandardNodeLibrary, WebGPUBackend } from "three/webgpu";
 
 import { BigParticleGroup } from "./particles/BigParticleGroup";
 import { DustParticleGroup } from "./objects/DustParticleGroup";
@@ -34,12 +33,13 @@ interface IThreeObjects {
  * メインの3D管理クラスです。
  */
 export class World {
+  /** WebGPUレンダラーとシーン素材の初期化完了を表す。 */
   public readonly ready: Promise<void>;
   private readonly scene: Scene;
   private readonly camera: PerspectiveCamera;
-  private renderer!: WebGPURenderer;
+  private renderer!: Renderer;
   private readonly _objects: IThreeObjects;
-  private readonly _debugInfo: DebugInfo;
+  private _debugInfo: DebugInfo;
   private _needResize = false;
   private _needRender = true;
   private _width = 960;
@@ -49,7 +49,7 @@ export class World {
   private _isPlaying: boolean;
   private _initialized = false;
   private _animationTime = Date.now();
-  private _canvas: HTMLCanvasElement;
+  private _canvas: OffscreenCanvas;
   private _lastTimestamp: number | null = null;
   private readonly onFrame = (timestamp: number) => this.tick(timestamp);
 
@@ -58,13 +58,11 @@ export class World {
     visibleInfo,
     enabledMotion,
     autoPlay = true,
-    inspectorEnabled = true,
   }: {
-    canvas: HTMLCanvasElement;
+    canvas: OffscreenCanvas;
     visibleInfo: DebugInfo;
     enabledMotion: boolean;
     autoPlay?: boolean;
-    inspectorEnabled?: boolean;
   }) {
     this._debugInfo = visibleInfo;
     this._motionEnabled = enabledMotion;
@@ -106,19 +104,22 @@ export class World {
     };
     this._objects = objects;
 
-    this.ready = this.init(inspectorEnabled);
+    this.ready = this.init();
   }
 
-  private async init(inspectorEnabled: boolean) {
+  /** Worker内でレンダラーとシーンを初期化する。 */
+  private async init(): Promise<void> {
     await TextureManager.init();
 
-    // レンダラーを作成
-    this.renderer = new WebGPURenderer({
+    // WebGPUバックエンドを直接指定し、Three.jsのWebGL2フォールバックを使わない。
+    const rendererOptions = {
       antialias: false,
       // 黒背景を不透明にし、透明キャンバスの合成方法による明度の変化を防ぐ。
       alpha: false,
       canvas: this._canvas,
-    });
+    };
+    this.renderer = new Renderer(new WebGPUBackend(rendererOptions), rendererOptions);
+    this.renderer.library = new StandardNodeLibrary();
     this.renderer.outputColorSpace = SRGBColorSpace;
     await this.renderer.init();
 
@@ -179,7 +180,6 @@ export class World {
         a.groupOrder! - b.groupOrder! || a.renderOrder! - b.renderOrder! || b.z! - a.z! || aId - bId
       );
     });
-    if (inspectorEnabled) this.initInspector();
     this._initialized = true;
     this._animationTime = Date.now();
     await this.renderer.setAnimationLoop(this._isPlaying ? this.onFrame : null);
@@ -206,19 +206,10 @@ export class World {
     return this._initialized && this._isPlaying;
   }
 
-  private initInspector(): void {
-    const inspector = new Inspector();
-    this.renderer.inspector = inspector;
-
-    const parameters = inspector.createParameters("Display");
-
-    for (const key of Object.keys(this._debugInfo) as (keyof DebugInfo)[]) {
-      parameters.add(this._debugInfo, key).onChange(() => {
-        this._needRender = true;
-      });
-    }
-
-    inspector.hide();
+  /** Inspectorの表示設定を次の描画に反映する。 */
+  public updateDebugInfo(visibleInfo: DebugInfo): void {
+    this._debugInfo = { ...this._debugInfo, ...visibleInfo };
+    this._needRender = true;
   }
 
   private tick(timestamp: number): void {
@@ -268,13 +259,14 @@ export class World {
       }
     }
 
-    // モーション停止中も、Inspector の操作やリサイズを描画へ反映する。
+    // OS設定でモーションが無効な場合も、Inspectorの変更とリサイズを反映する。
     if (this._needRender || needsResizeRender || needsAnimationRender) {
       this.renderer.render(this.scene, this.camera);
       this._needRender = false;
     }
   }
 
+  /** キャンバスとカメラのリサイズを次の描画フレームに予約する。 */
   public resize({
     width,
     height,

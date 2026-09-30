@@ -20,8 +20,9 @@ await window.threeWaves.ready; // 初期化完了を待つ
 
 `pause()` / `play()` は初期化完了前にも呼び出せます。OSの「視差効果を減らす」設定を尊重します。
 
-Inspectorは起動時のURLに `?inspector=false` を付けるとOFFになります。未指定または `?inspector=true` でONです。
-iframeの場合は `src` に指定してください。OFF時はInspectorのUI・計測を初期化しません。
+描画とアニメーション計算は Web Worker 内で実行します。HTML の canvas を OffscreenCanvas として Worker に渡し、Worker 内で WebGPU バックエンドを初期化します。WebGPU 専用のため WebGL2 には切り替えません。WebGPU の初期化に失敗した場合、`ready` は reject します。
+
+`?inspector=true` を付けると Three.js Inspector の「Parameters」で各要素の表示を切り替えられます。設定は Worker に送られ、描画は Worker 内のままです。レンダラーの計測タブは Worker 内のレンダラーに接続できないため表示しません。
 
 ## 関連リポジトリ
 

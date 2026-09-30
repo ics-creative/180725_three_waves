@@ -1,14 +1,16 @@
-import { World } from "./view3d/World";
-import { DebugInfo } from "./view3d/data/DebugInfo";
+import type { DebugInfo } from "./view3d/data/DebugInfo";
+import type { RenderSize, WorkerRequest, WorkerResponse } from "./worker-protocol";
+import type { Tab } from "three/addons/inspector/ui/Tab.js";
 
-let world: World | undefined;
-let playRequested = true;
-
+/** Worker内のWebGPUシーンを操作するためのインターフェース。 */
 export interface ThreeWavesControls {
-  /** レンダラーと画像の初期化完了。失敗時はrejectする。 */
+  /** レンダラーとシーン素材の初期化が完了すると解決する。 */
   readonly ready: Promise<void>;
+  /** 初期化が完了し、アニメーションが再生中かどうか。 */
   readonly isPlaying: boolean;
+  /** 現在のシーン状態からアニメーションを再開する。 */
   play(): void;
+  /** 最後の描画を残してアニメーションを停止する。 */
   pause(): void;
 }
 
@@ -32,7 +34,55 @@ const visibleInfo: DebugInfo = {
   waves: true,
 };
 
-// 後からスクリプトを読み込む組み込み先でも初期化する。
+let renderWorker: Worker | undefined;
+let playRequested = true;
+let initialized = false;
+
+/** Workerに渡す画面サイズとモーション設定を取得する。 */
+const createSizeObject = (): RenderSize => ({
+  width: innerWidth,
+  height: innerHeight,
+  devicePixelRatio,
+  enabledMotion: !mediaQuery.matches,
+});
+
+/** Workerの描画サイズとモーション設定の案内を更新する。 */
+const resize = (): void => {
+  const size = createSizeObject();
+  renderWorker?.postMessage({ type: "resize", size } satisfies WorkerRequest);
+  document.querySelector(".reduceMotionWarn")?.toggleAttribute("hidden", size.enabledMotion);
+};
+
+/** Three.js InspectorのParametersをWorkerの表示設定に接続する。 */
+async function initInspector(worker: Worker): Promise<void> {
+  const { Inspector } = await import("three/addons/inspector/Inspector.js");
+  const inspector = new Inspector();
+  const controls = inspector.createParameters("Display");
+
+  for (const key of Object.keys(visibleInfo) as (keyof DebugInfo)[]) {
+    controls.add(visibleInfo, key).onChange(() => {
+      worker.postMessage({
+        type: "visibility",
+        visibleInfo: { ...visibleInfo },
+      } satisfies WorkerRequest);
+    });
+  }
+
+  // レンダラーを参照する計測タブはWorker越しに使えないため、Parametersだけを残す。
+  const { parameters, profiler } = inspector as typeof inspector & {
+    parameters: Tab;
+    profiler: { tabs: Record<string, Tab>; togglePanel(): void };
+  };
+  for (const tab of Object.values(profiler.tabs)) {
+    if (tab !== parameters) inspector.removeTab(tab);
+  }
+
+  document.body.append(inspector.domElement);
+  inspector.setActiveTab(parameters);
+  profiler.togglePanel();
+}
+
+/** キャンバスをWorkerに渡し、WebGPUの初期化完了を待つ。 */
 async function init(): Promise<void> {
   if (document.readyState === "loading") {
     await new Promise<void>((resolve) => {
@@ -41,72 +91,69 @@ async function init(): Promise<void> {
   }
 
   const canvas = document.querySelector<HTMLCanvasElement>("#mainCanvas");
-  if (!canvas) throw new Error("Three.js Waves: #mainCanvas が見つかりません。");
+  if (!canvas) throw new Error("Three.js Waves: #mainCanvas was not found.");
 
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
+  const offscreen = canvas.transferControlToOffscreen();
+  const worker = new Worker(new URL("./render.worker.ts", import.meta.url), { type: "module" });
+  renderWorker = worker;
 
-  world = new World({
-    canvas,
-    visibleInfo,
-    enabledMotion: !mediaQuery.matches,
-    autoPlay: playRequested,
-    inspectorEnabled: new URLSearchParams(location.search).get("inspector") !== "false",
+  const ready = new Promise<void>((resolve, reject) => {
+    worker.addEventListener("message", (event: MessageEvent<WorkerResponse>) => {
+      if (event.data.type === "ready") {
+        initialized = true;
+        resolve();
+      } else if (event.data.type === "error") {
+        reject(new Error(event.data.message));
+      }
+    });
+    worker.addEventListener("error", (event) => reject(event.error ?? new Error(event.message)), {
+      once: true,
+    });
   });
 
-  resize(); // 初回リサイズ呼び出し
-  await world.ready;
+  worker.postMessage(
+    {
+      type: "init",
+      canvas: offscreen,
+      visibleInfo: { ...visibleInfo },
+      size: createSizeObject(),
+      autoPlay: playRequested,
+    } satisfies WorkerRequest,
+    [offscreen],
+  );
+  resize();
+  await Promise.all([
+    ready,
+    new URLSearchParams(location.search).get("inspector") === "true"
+      ? initInspector(worker)
+      : Promise.resolve(),
+  ]);
   window.dispatchEvent(new Event("three-waves-ready"));
 }
-
-const resize = () => {
-  const obj = createSizeObject();
-  world?.resize(obj);
-
-  // .reduceMotionWarn の表示制御は維持
-  const dom = document.querySelector(".reduceMotionWarn");
-  if (!obj.enabledMotion) {
-    dom?.removeAttribute("hidden");
-  } else {
-    dom?.setAttribute("hidden", "true");
-  }
-};
 
 window.addEventListener("resize", resize);
 mediaQuery.addEventListener("change", resize);
 
-// createSizeObject は enabledMotion を返す
-const createSizeObject = (): {
-  width: number;
-  devicePixelRatio: number;
-  height: number;
-  enabledMotion: boolean;
-} => ({
-  width: innerWidth,
-  height: innerHeight,
-  devicePixelRatio: devicePixelRatio,
-  enabledMotion: !Boolean(mediaQuery?.matches),
-});
-
 window.threeWaves = Object.freeze({
   ready: init(),
   get isPlaying() {
-    return world?.isPlaying ?? false;
+    return initialized && playRequested;
   },
   play() {
     playRequested = true;
-    world?.play();
+    renderWorker?.postMessage({ type: "play" } satisfies WorkerRequest);
   },
   pause() {
     playRequested = false;
-    world?.pause();
+    renderWorker?.postMessage({ type: "pause" } satisfies WorkerRequest);
   },
 });
 
-// 別オリジンのiframeとして組み込む場合の制御窓口。
-const parentOrigins = new Set([location.origin, "https://ics-web.jp", "https://www.ics-web.jp"]);
+/** 埋め込み元のページから再生・停止の指示を受け取る。 */
 window.addEventListener("message", (event: MessageEvent<unknown>) => {
-  if (event.source !== window.parent || !parentOrigins.has(event.origin)) return;
+  if (event.source !== window.parent) return;
   const data = event.data;
   if (
     typeof data !== "object" ||
