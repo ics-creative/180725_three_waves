@@ -1,5 +1,7 @@
 import { DirectionalLight, Fog, PerspectiveCamera, Scene, SRGBColorSpace, Vector3 } from "three";
-import { Renderer, StandardNodeLibrary, WebGPUBackend } from "three/webgpu";
+import { Renderer, RenderPipeline, StandardNodeLibrary, WebGPUBackend } from "three/webgpu";
+import { mix, pass, smoothstep, vec2, viewportUV } from "three/tsl";
+import { gaussianBlur } from "three/addons/tsl/display/GaussianBlurNode.js";
 
 import { BigParticleGroup } from "./particles/BigParticleGroup";
 import { DustParticleGroup } from "./objects/DustParticleGroup";
@@ -38,6 +40,7 @@ export class World {
   private readonly scene: Scene;
   private readonly camera: PerspectiveCamera;
   private renderer!: Renderer;
+  private renderPipeline!: RenderPipeline;
   private readonly _objects: IThreeObjects;
   private _debugInfo: DebugInfo;
   private _needResize = false;
@@ -164,7 +167,7 @@ export class World {
 
       {
         // パーティクルを作成
-        const group = new DustParticleGroup(5000, -200, +500, 200);
+        const group = new DustParticleGroup(2500, -200, +500, 200);
         this.scene.add(group);
         objects.dustParticleGroup = group;
       }
@@ -180,6 +183,14 @@ export class World {
         a.groupOrder! - b.groupOrder! || a.renderOrder! - b.renderOrder! || b.z! - a.z! || aId - bId
       );
     });
+
+    // 中央60%は鮮明に保ち、上下それぞれ端の20%を滑らかにぼかす。
+    const sceneColor = pass(this.scene, this.camera).getTextureNode();
+    const blurredScene = gaussianBlur(sceneColor, vec2(3), 4, { resolutionScale: 0.5 });
+    const blurStrength = smoothstep(0.3, 0.5, viewportUV.y.sub(0.5).abs());
+    this.renderPipeline = new RenderPipeline(this.renderer);
+    this.renderPipeline.outputNode = mix(sceneColor, blurredScene, blurStrength);
+
     this._initialized = true;
     this._animationTime = Date.now();
     await this.renderer.setAnimationLoop(this._isPlaying ? this.onFrame : null);
@@ -261,7 +272,7 @@ export class World {
 
     // OS設定でモーションが無効な場合も、Inspectorの変更とリサイズを反映する。
     if (this._needRender || needsResizeRender || needsAnimationRender) {
-      this.renderer.render(this.scene, this.camera);
+      this.renderPipeline.render();
       this._needRender = false;
     }
   }
