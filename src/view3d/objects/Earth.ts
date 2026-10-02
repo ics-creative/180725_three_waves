@@ -1,4 +1,4 @@
-import { BufferAttribute, Color, Mesh, MeshPhongMaterial, PlaneGeometry } from "three";
+import { BufferAttribute, Color, LineBasicMaterial, LineSegments, PlaneGeometry } from "three";
 import { SimplexNoise } from "three/examples/jsm/math/SimplexNoise.js";
 
 // 変更: 解像度を上げる (75 -> 150)
@@ -7,16 +7,25 @@ export const LENGTH = 2000;
 
 const noise = new SimplexNoise();
 
-export class Earth extends Mesh {
+export class Earth extends LineSegments {
   // 追加: 経過時間を保持する変数
   private _elapsedTime = 0;
 
   constructor() {
-    // 箱を作成
     const geometry = new PlaneGeometry(LENGTH * 2, LENGTH * 2, SEGMENT, SEGMENT);
-    const material = new MeshPhongMaterial({
-      color: new Color().setHSL(0.7, 0.7, 0.5),
-      wireframe: true,
+    // 各頂点を右隣・下隣だけにつなぎ、対角線のない格子にする。
+    const indices: number[] = [];
+    for (let y = 0; y <= SEGMENT; y++) {
+      for (let x = 0; x <= SEGMENT; x++) {
+        const i = y * (SEGMENT + 1) + x;
+        if (x < SEGMENT) indices.push(i, i + 1);
+        if (y < SEGMENT) indices.push(i, i + SEGMENT + 1);
+      }
+    }
+    geometry.setIndex(indices);
+    const material = new LineBasicMaterial({
+      // 照明の影響を受けないため、元の床に合わせて明度を抑える。
+      color: new Color().setHSL(0.7, 0.7, 0.1),
     });
     super(geometry, material);
   }
